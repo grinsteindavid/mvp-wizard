@@ -189,5 +189,4 @@ describe('formUtils', () => {
     });
   });
   
-  // validateField tests removed as this function has been moved to validationService
 });

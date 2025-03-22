@@ -2,32 +2,6 @@
  * Utility functions for form handling
  */
 
-/**
- * Sets a value in an object at a path specified by a dot notation string
- * @param {Object} obj - The object to update
- * @param {string} path - The path in dot notation (e.g., 'bidding.strategy')
- * @param {*} value - The value to set
- * @returns {Object} - A new object with the updated value
- */
-export const setNestedValue = (obj, path, value) => {
-  if (!path) return { ...obj, [path]: value };
-  
-  const parts = path.split('.');
-  const [first, ...rest] = parts;
-  
-  if (rest.length === 0) {
-    return { ...obj, [first]: value };
-  }
-  
-  return {
-    ...obj,
-    [first]: setNestedValue(
-      obj[first] === undefined ? {} : obj[first],
-      rest.join('.'),
-      value
-    )
-  };
-};
 
 /**
  * Flattens nested form errors into a format that can be used by form components

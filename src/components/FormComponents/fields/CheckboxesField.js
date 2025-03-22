@@ -34,19 +34,19 @@ const CheckboxesField = ({
     <FieldContainer>
       <Label>{field.label}</Label>
       {loading ? (
-        <div style={{ color: '#666', fontStyle: 'italic' }}>Loading options...</div>
+        <div style={{ color: '#666', fontStyle: 'italic', marginBottom: '8px', padding: '4px 0' }}>
+          Loading options...
+        </div>
       ) : (
         field.options && field.options.map(option => (
           <OptionLabel 
-            key={option.value} 
-            style={loading ? { opacity: 0.7, cursor: 'wait' } : {}}
+            key={option.value}
           >
             <Checkbox
               name={`${field.name}[${option.value}]`}
               checked={values.includes(option.value)}
               onChange={(e) => handleChange(option.value, e.target.checked)}
-              disabled={disabled || loading}
-              data-loading={loading}
+              disabled={disabled}
             />
             {option.label}
           </OptionLabel>

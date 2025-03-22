@@ -131,25 +131,25 @@ export const SecondaryDataSourceProvider = ({ children }) => {
     const loadData = async () => {
       try {
         // Set loading state
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: true });
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: true });
+        baseContextValue.setFieldLoading('targeting.countries', true);
+        baseContextValue.setFieldLoading('targeting.devices', true);
         
         // Load countries for targeting
         const {data: countries} = await secondaryDataService.getCountries();
         setCountries(countries);
         baseContextValue.updateFieldOptions('targeting.countries', countries);
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: false });
+        baseContextValue.setFieldLoading('targeting.countries', false);
         
         // Load devices for targeting
         const {data: devices} = await secondaryDataService.getDevices();
         setDevices(devices);
         baseContextValue.updateFieldOptions('targeting.devices', devices);
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: false });
+        baseContextValue.setFieldLoading('targeting.devices', false);
       } catch (error) {
         console.error('Error loading data from services:', error);
         // Clear loading states on error
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: false });
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: false });
+        baseContextValue.setFieldLoading('targeting.countries', false);
+        baseContextValue.setFieldLoading('targeting.devices', false);
       }
     };
     
@@ -163,7 +163,6 @@ export const SecondaryDataSourceProvider = ({ children }) => {
     setCountries,
     setDevices,
     fields: state.fields || builders.fields,
-    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
   };
   
   return (

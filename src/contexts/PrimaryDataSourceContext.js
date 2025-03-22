@@ -139,7 +139,7 @@ export const PrimaryDataSourceProvider = ({ children }) => {
     const loadData = async () => {
       try {
         // Set loading state for bidStrategy field
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: true });
+        baseContextValue.setFieldLoading('bidStrategy', true);
         
         // Load bid strategies
         const {data: strategies} = await primaryDataService.getOptimizationStrategies();
@@ -148,11 +148,11 @@ export const PrimaryDataSourceProvider = ({ children }) => {
         baseContextValue.updateFieldOptions('bidStrategy', strategies);
         
         // Clear loading state for bidStrategy field
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: false });
+        baseContextValue.setFieldLoading('bidStrategy', false);
       } catch (error) {
         console.error('Error loading data from services:', error);
         // Clear loading state on error too
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: false });
+        baseContextValue.setFieldLoading('bidStrategy', false);
       }
     };
     
@@ -165,8 +165,6 @@ export const PrimaryDataSourceProvider = ({ children }) => {
     addCategoryGroup,
     removeCategoryGroup,
     updateCategoryGroup,
-    // Add helper to check if a field is loading
-    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
     // Use fields from the state if available, otherwise use the builders fields
     fields: state.fields || builders.fields
   };

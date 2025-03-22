@@ -3,6 +3,7 @@ import FormField from './FormField';
 import FormGroup from './FormGroup';
 import ArrayField from './ArrayField';
 import { FormContainer } from './styled/FormElements';
+import { get } from 'lodash';
 
 /**
  * DynamicForm component that renders a form based on a configuration object.
@@ -13,6 +14,7 @@ import { FormContainer } from './styled/FormElements';
 const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFields = {} }) => {
   // Local state for field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
+  console.log(loadingFields)
   
   // Combine passed errors with local field validation errors
   const combinedErrors = { ...fieldErrors, ...errors };
@@ -99,6 +101,7 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
                 values={fieldValue}
                 onChange={handleFieldChange}
                 errors={combinedErrors}
+                loadingFields={loadingFields}
               />
             );
           case 'array':
@@ -109,6 +112,7 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
                 value={fieldValue}
                 onChange={handleFieldChange}
                 errors={combinedErrors}
+                loadingFields={loadingFields}
               />
             );
           default:
@@ -120,7 +124,7 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
                 onChange={handleFieldChange}
                 onBlur={handleBlur}
                 error={fieldError}
-                loading={loadingFields[fieldName]}
+                loading={loadingFields && get(loadingFields, fieldName)}
               />
             );
         }

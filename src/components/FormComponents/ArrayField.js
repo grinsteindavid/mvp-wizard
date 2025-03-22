@@ -9,12 +9,13 @@ import {
   Button, 
   ErrorMessage 
 } from './styled/FormElements';
+import { get } from 'lodash';
 
 /**
  * ArrayField component for handling arrays of form fields.
  * Allows adding, removing, and editing items in the array.
  */
-const ArrayField = ({ field, value = [], onChange, errors }) => {
+const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
   // Create a new empty item based on the field configuration
   const createEmptyItem = () => {
     const item = {};
@@ -80,6 +81,7 @@ const ArrayField = ({ field, value = [], onChange, errors }) => {
                 value={fieldValue}
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
+                loading={loadingFields && get(loadingFields, fieldName)}
               />
             );
           })}

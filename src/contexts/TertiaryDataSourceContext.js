@@ -182,8 +182,8 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     const loadData = async () => {
       try {
         // Set loading state for fields
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: true });
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: true });
+        baseContextValue.setFieldLoading('projectObjective', true);
+        baseContextValue.setFieldLoading('bidding.strategy', true);
         
         // Load objectives
         const {data: objectives} = await tertiaryDataService.getObjectives();
@@ -196,16 +196,16 @@ export const TertiaryDataSourceProvider = ({ children }) => {
         baseContextValue.updateFieldOptions('bidding.strategy', strategies);
         
         // Clear loading states
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: false });
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: false });
+        baseContextValue.setFieldLoading('projectObjective', false);
+        baseContextValue.setFieldLoading('bidding.strategy', false);
       } catch (error) {
         console.error('Error loading data from services:', error);
         // Clear loading states on error
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: false });
-        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: false });
+        baseContextValue.setFieldLoading('projectObjective', false);
+        baseContextValue.setFieldLoading('bidding.strategy', false);
       }
     };
-    
+
     loadData();
   }, []);
 
@@ -219,7 +219,6 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     setBudgetTypes,
     setBiddingStrategies,
     fields: state.fields || builders.fields,
-    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
   };
   
   return (

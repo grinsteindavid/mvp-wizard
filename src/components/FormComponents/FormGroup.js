@@ -1,12 +1,13 @@
 import React from 'react';
 import FormField from './FormField';
 import { GroupContainer, GroupTitle } from './styled/FormElements';
+import {get} from 'lodash';
 
 /**
  * FormGroup component for rendering a group of related form fields.
  * Groups fields together visually and handles nested field values.
  */
-const FormGroup = ({ field, values, onChange, errors }) => {
+const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
   const handleFieldChange = (fieldName, fieldValue) => {
     // Update the nested field within the group
     const updatedGroupValue = {
@@ -41,6 +42,7 @@ const FormGroup = ({ field, values, onChange, errors }) => {
             value={fieldValue}
             onChange={handleFieldChange}
             error={fieldError}
+            loading={loadingFields && get(loadingFields, fieldName)}
           />
         );
       })}

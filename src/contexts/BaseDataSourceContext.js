@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
-import { setNestedValue } from '../utils/formUtils';
+import { set } from 'lodash';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -26,7 +26,7 @@ const baseReducerActions = {
 const baseReducer = (state, action) => {
   switch (action.type) {
     case baseReducerActions.UPDATE_FIELD:
-      return setNestedValue(state, action.field, action.value);
+      return set({...state}, action.field, action.value);
     case baseReducerActions.SET_VALIDATION_RESULT:
       return {
         ...state,
@@ -44,34 +44,16 @@ const baseReducer = (state, action) => {
         isSubmitted: action.payload
       };
     case baseReducerActions.SET_FIELD_LOADING:
-      return {
-        ...state,
-        loadingFields: {
-          ...state.loadingFields,
-          [action.field]: action.isLoading
-        }
-      };
+      console.log('Setting field loading state:', action.field, action.isLoading);
+      return set(
+        {...state},
+        'loadingFields.' + action.field,
+        action.isLoading
+      );
     case baseReducerActions.UPDATE_FIELD_OPTIONS:
       // For nested fields like 'bidding.strategy'
-      const parts = action.fieldName.split('.');
-      
-      if (parts.length === 1) {
-        // Simple case - direct field in fields object
-        return {
-          ...state,
-          fields: {
-            ...state.fields,
-            [action.fieldName]: {
-              ...state.fields?.[action.fieldName],
-              options: action.options
-            }
-          }
-        };
-      } else {
-        // For nested fields, construct the full path to the options property
-        const optionsPath = `fields.${parts.join('.fields.')}.options`;
-        return setNestedValue(state, optionsPath, action.options);
-      }
+      const fieldPath = `fields.${action.fieldName}.options`;
+      return set({...state}, fieldPath, action.options);
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
     default:
