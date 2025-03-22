@@ -80,9 +80,7 @@ const primaryFields = {
     type: 'select',
     required: true,
     options: [
-      { value: 'cpc', label: 'Performance Based (CPC)' },
-      { value: 'cpm', label: 'Impression Based (CPM)' },
-      { value: 'cpv', label: 'Engagement Based (CPV)' }
+
     ],
     validateField: (value, formData) => validateField('primary', 'bidStrategy', value, formData)
   },
