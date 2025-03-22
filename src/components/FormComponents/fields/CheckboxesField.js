@@ -6,7 +6,8 @@ const CheckboxesField = ({
   value, 
   onChange, 
   error, 
-  disabled = false 
+  disabled = false,
+  loading = false
 }) => {
   const handleChange = (optionValue, checked) => {
     const currentValues = Array.isArray(value) ? [...value] : [];
@@ -32,17 +33,25 @@ const CheckboxesField = ({
   return (
     <FieldContainer>
       <Label>{field.label}</Label>
-      {field.options && field.options.map(option => (
-        <OptionLabel key={option.value}>
-          <Checkbox
-            name={`${field.name}[${option.value}]`}
-            checked={values.includes(option.value)}
-            onChange={(e) => handleChange(option.value, e.target.checked)}
-            disabled={disabled}
-          />
-          {option.label}
-        </OptionLabel>
-      ))}
+      {loading ? (
+        <div style={{ color: '#666', fontStyle: 'italic' }}>Loading options...</div>
+      ) : (
+        field.options && field.options.map(option => (
+          <OptionLabel 
+            key={option.value} 
+            style={loading ? { opacity: 0.7, cursor: 'wait' } : {}}
+          >
+            <Checkbox
+              name={`${field.name}[${option.value}]`}
+              checked={values.includes(option.value)}
+              onChange={(e) => handleChange(option.value, e.target.checked)}
+              disabled={disabled || loading}
+              data-loading={loading}
+            />
+            {option.label}
+          </OptionLabel>
+        ))
+      )}
       {error && <ErrorMessage>{error}</ErrorMessage>}
       {field.helpText && <HelpText>{field.helpText}</HelpText>}
     </FieldContainer>

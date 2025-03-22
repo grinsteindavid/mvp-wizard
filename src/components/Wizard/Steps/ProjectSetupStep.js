@@ -89,6 +89,15 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
         values={currentSource.state || {}}
         onChange={handleFormChange}
         errors={currentSource.state?.errors || {}}
+        loadingFields={
+          // Create an object with field names as keys and loading state as values
+          Object.keys(currentSource.fields || {}).reduce((acc, fieldName) => {
+            // Use the isFieldLoading helper if available, otherwise default to false
+            acc[fieldName] = currentSource.isFieldLoading ? 
+              currentSource.isFieldLoading(fieldName) : false;
+            return acc;
+          }, {})
+        }
       />
       
       <ButtonContainer>

@@ -13,7 +13,8 @@ const FormField = ({
   onChange,
   onBlur,
   error,
-  disabled = false
+  disabled = false,
+  loading = false
 }) => {
   // Get the appropriate field component based on the field type
   const FieldComponent = fieldTypeMap[field.type];
@@ -36,6 +37,7 @@ const FormField = ({
       onBlur={onBlur}
       error={error}
       disabled={disabled}
+      loading={loading}
     />
   );
 };

@@ -12,11 +12,24 @@ const withFieldMemoization = (FieldComponent) => {
   // Create a display name for the wrapped component
   const displayName = FieldComponent.displayName || FieldComponent.name || 'Component';
   
+  // Create a wrapper component that handles loading state
+  const FieldWithLoading = (props) => {
+    const { loading, ...restProps } = props;
+    
+    // Pass loading state as disabled if true
+    return <FieldComponent 
+      {...restProps} 
+      disabled={props.disabled || loading}
+      loading={loading} // Pass loading as a separate prop for components that want to show loading indicators
+    />;
+  };
+  
   // Apply memoization with a custom comparison function using deep equality
-  const MemoizedComponent = memo(FieldComponent, createDeepEqualityCheck((prevProps, nextProps, isEqual) => {
+  const MemoizedComponent = memo(FieldWithLoading, createDeepEqualityCheck((prevProps, nextProps, isEqual) => {
     // Check primitive props with === for performance
     if (
       prevProps.disabled !== nextProps.disabled ||
+      prevProps.loading !== nextProps.loading ||
       prevProps.field.name !== nextProps.field.name ||
       prevProps.field.type !== nextProps.field.type ||
       prevProps.onBlur !== nextProps.onBlur

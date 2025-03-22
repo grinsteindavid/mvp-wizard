@@ -17,7 +17,7 @@
 - Follow the DRY principle judiciously
 - Create abstraction layers for complex operations
 - Use meaningful variable and function names
-- Do not create examples files
+- DO NOT create files for examples
 
 
 ## Component Structure

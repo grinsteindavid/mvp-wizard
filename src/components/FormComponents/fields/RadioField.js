@@ -6,7 +6,8 @@ const RadioField = ({
   value, 
   onChange, 
   error, 
-  disabled = false 
+  disabled = false,
+  loading = false
 }) => {
   const handleChange = (optionValue) => {
     onChange(field.name, optionValue);
@@ -15,18 +16,26 @@ const RadioField = ({
   return (
     <FieldContainer>
       <Label>{field.label}</Label>
-      {field.options && field.options.map(option => (
-        <OptionLabel key={option.value}>
-          <RadioButton
-            name={field.name}
-            value={option.value}
-            checked={value === option.value}
-            onChange={() => handleChange(option.value)}
-            disabled={disabled}
-          />
-          {option.label}
-        </OptionLabel>
-      ))}
+      {loading ? (
+        <div style={{ color: '#666', fontStyle: 'italic' }}>Loading options...</div>
+      ) : (
+        field.options && field.options.map(option => (
+          <OptionLabel 
+            key={option.value}
+            style={loading ? { opacity: 0.7, cursor: 'wait' } : {}}
+          >
+            <RadioButton
+              name={field.name}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => handleChange(option.value)}
+              disabled={disabled || loading}
+              data-loading={loading}
+            />
+            {option.label}
+          </OptionLabel>
+        ))
+      )}
       {error && <ErrorMessage>{error}</ErrorMessage>}
       {field.helpText && <HelpText>{field.helpText}</HelpText>}
     </FieldContainer>

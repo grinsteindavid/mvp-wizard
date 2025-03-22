@@ -21,6 +21,7 @@ class PrimaryDataService extends BaseDataService {
    * @returns {Promise} - Promise that resolves with the bid strategies
    */
   getOptimizationStrategies() {
+    console.log('Fetching bid strategies...');
     return this.httpService.get('/api/primary/bid-strategies', this.mockData.bidStrategies);
   }
 }

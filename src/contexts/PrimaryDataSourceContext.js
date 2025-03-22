@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect } from 'react';
+import React, { createContext, useReducer, useEffect, useCallback } from 'react';
 import { createDataSourceBuilders, createUseDataSource, baseActions } from './BaseDataSourceContext';
 import { primaryDataService } from '../services/http';
 import { validateField } from '../services/validationService';
@@ -14,7 +14,56 @@ const initialState = {
   keywords: '',
   categoryGroups: [],
   // Available options for selection - not part of schema validation
-  availableBidStrategies: []
+  availableBidStrategies: [],
+  // Store field definitions with their options in state
+  fields: {
+    projectName: {
+      label: 'Project Name',
+      type: 'text',
+      required: true,
+      validateField: (value, formData) => validateField('primary', 'projectName', value, formData)
+    },
+    dailyBudget: {
+      label: 'Daily Budget',
+      type: 'number',
+      required: true,
+      validateField: (value, formData) => validateField('primary', 'dailyBudget', value, formData)
+    },
+    bidStrategy: {
+      label: 'Bid Strategy',
+      type: 'select',
+      required: true,
+      options: [], // Will be populated via dispatch when strategies are loaded
+      validateField: (value, formData) => validateField('primary', 'bidStrategy', value, formData)
+    },
+    keywords: {
+      label: 'Keywords',
+      type: 'textarea',
+      required: true,
+      placeholder: 'Enter keywords separated by commas',
+      validateField: (value, formData) => validateField('primary', 'keywords', value, formData)
+    },
+    categoryGroups: {
+      label: 'Category Groups',
+      type: 'array',
+      required: true,
+      validateField: (value, formData) => validateField('primary', 'categoryGroups', value, formData),
+      fields: {
+        name: {
+          label: 'Group Name',
+          type: 'text',
+          required: true,
+          validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.name`, value, formData)
+        },
+        cpc: {
+          label: 'Max CPC',
+          type: 'number',
+          required: true,
+          validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.cpc`, value, formData)
+        }
+      }
+    }
+  }
 };
 
 // Primary-specific reducer actions
@@ -22,7 +71,8 @@ const primaryActions = {
   ADD_CATEGORY_GROUP: 'ADD_CATEGORY_GROUP',
   REMOVE_CATEGORY_GROUP: 'REMOVE_CATEGORY_GROUP',
   UPDATE_CATEGORY_GROUP: 'UPDATE_CATEGORY_GROUP',
-  SET_BID_STRATEGIES: 'SET_BID_STRATEGIES'
+  SET_BID_STRATEGIES: 'SET_BID_STRATEGIES',
+  UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS'
 };
 
 // Primary-specific reducer
@@ -54,102 +104,55 @@ const primaryReducer = (state, action) => {
         ...state,
         availableBidStrategies: action.payload
       };
+      
     default:
       // Return the state unchanged to let the base reducer handle it
       return state;
   }
 };
 
-// Field definitions for Primary Integration - aligned with primarySchema
-// Validation is connected directly to the schema
-const primaryFields = {
-  projectName: {
-    label: 'Project Name',
-    type: 'text',
-    required: true,
-    validateField: (value, formData) => validateField('primary', 'projectName', value, formData)
-  },
-  dailyBudget: {
-    label: 'Daily Budget',
-    type: 'number',
-    required: true,
-    validateField: (value, formData) => validateField('primary', 'dailyBudget', value, formData)
-  },
-  bidStrategy: {
-    label: 'Bid Strategy',
-    type: 'select',
-    required: true,
-    options: [
-
-    ],
-    validateField: (value, formData) => validateField('primary', 'bidStrategy', value, formData)
-  },
-  keywords: {
-    label: 'Keywords',
-    type: 'textarea',
-    required: true,
-    placeholder: 'Enter keywords separated by commas',
-    validateField: (value, formData) => validateField('primary', 'keywords', value, formData)
-  },
-  categoryGroups: {
-    label: 'Category Groups',
-    type: 'array',
-    required: true,
-    validateField: (value, formData) => validateField('primary', 'categoryGroups', value, formData),
-    fields: {
-      name: {
-        label: 'Group Name',
-        type: 'text',
-        required: true,
-        validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.name`, value, formData)
-      },
-      cpc: {
-        label: 'Max CPC',
-        type: 'number',
-        required: true,
-        validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.cpc`, value, formData)
-      }
-    }
-  }
-};
 
 // Get the building blocks from the base context
-const builders = createDataSourceBuilders(initialState, primaryReducer, primaryFields);
+const builders = createDataSourceBuilders(initialState, primaryReducer);
 
 // Create the provider component with custom side effects
 export const PrimaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
+  const baseContextValue = builders.createContextValue(state, dispatch);
   
-  // Primary-specific actions
-  const addCategoryGroup = () => {
+  // Primary-specific actions - wrapped in useCallback to prevent unnecessary re-renders
+  const addCategoryGroup = useCallback(() => {
     dispatch({ type: primaryActions.ADD_CATEGORY_GROUP });
-  };
+  }, [dispatch]);
   
-  const removeCategoryGroup = (index) => {
+  const removeCategoryGroup = useCallback((index) => {
     dispatch({ type: primaryActions.REMOVE_CATEGORY_GROUP, index });
-  };
+  }, [dispatch]);
   
-  const updateCategoryGroup = (index, field, value) => {
+  const updateCategoryGroup = useCallback((index, field, value) => {
     dispatch({ type: primaryActions.UPDATE_CATEGORY_GROUP, index, field, value });
-  };
+  }, [dispatch]);
   
 
-  
-  const setBidStrategies = (strategies) => {
-    dispatch({ type: primaryActions.SET_BID_STRATEGIES, payload: strategies });
-  };
-  
   // Custom side effect - Load data from services on mount
   useEffect(() => {
     const loadData = async () => {
       try {
-
+        // Set loading state for bidStrategy field
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: true });
         
         // Load bid strategies
         const {data: strategies} = await primaryDataService.getOptimizationStrategies();
-        setBidStrategies(strategies);
+        // Dispatch action to set bid strategies
+        dispatch({ type: primaryActions.SET_BID_STRATEGIES, payload: strategies});
+        baseContextValue.updateFieldOptions('bidStrategy', strategies);
+        
+        // Clear loading state for bidStrategy field
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: false });
       } catch (error) {
         console.error('Error loading data from services:', error);
+        // Clear loading state on error too
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidStrategy', isLoading: false });
       }
     };
     
@@ -158,12 +161,14 @@ export const PrimaryDataSourceProvider = ({ children }) => {
   
   // Create the context value with base actions and primary-specific actions
   const contextValue = {
-    ...builders.createContextValue(state, dispatch),
+    ...baseContextValue,
     addCategoryGroup,
     removeCategoryGroup,
     updateCategoryGroup,
-
-    setBidStrategies
+    // Add helper to check if a field is loading
+    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
+    // Use fields from the state if available, otherwise use the builders fields
+    fields: state.fields || builders.fields
   };
   
   return (

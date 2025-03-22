@@ -6,7 +6,8 @@ const baseInitialState = {
   isValid: false,
   errors: {},
   isSubmitting: false,
-  isSubmitted: false
+  isSubmitted: false,
+  loadingFields: {} // Track loading state for individual fields
 };
 
 // Base reducer actions that all data sources will have
@@ -15,7 +16,9 @@ const baseReducerActions = {
   SET_VALIDATION_RESULT: 'SET_VALIDATION_RESULT',
   SET_SUBMITTING: 'SET_SUBMITTING',
   SET_SUBMITTED: 'SET_SUBMITTED',
-  RESET_FORM: 'RESET_FORM'
+  RESET_FORM: 'RESET_FORM',
+  SET_FIELD_LOADING: 'SET_FIELD_LOADING', // New action for field loading state
+  UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS' // Action for updating field options dynamically
 };
 
 // Base reducer function that all data sources can extend
@@ -41,6 +44,28 @@ const baseReducer = (state, action) => {
       return {
         ...state,
         isSubmitted: action.payload
+      };
+    case baseReducerActions.SET_FIELD_LOADING:
+      return {
+        ...state,
+        loadingFields: {
+          ...state.loadingFields,
+          [action.field]: action.isLoading
+        }
+      };
+    case baseReducerActions.UPDATE_FIELD_OPTIONS:
+      // Create a new fields object with updated options for the specified field
+      const updatedFields = {
+        ...state.fields,
+        [action.fieldName]: {
+          ...state.fields?.[action.fieldName],
+          options: action.options
+        }
+      };
+      console.log('Updated fields:', state,updatedFields);
+      return {
+        ...state,
+        fields: updatedFields
       };
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
@@ -70,6 +95,15 @@ export const createBaseActions = (dispatch) => ({
     dispatch({ type: baseReducerActions.SET_SUBMITTED, payload: isSubmitted });
   },
   
+  setFieldLoading: (field, isLoading) => {
+    dispatch({ type: baseReducerActions.SET_FIELD_LOADING, field, isLoading });
+  },
+  
+  updateFieldOptions: (fieldName, options) => {
+    console.log('Updating field options:', fieldName, options);
+    dispatch({ type: baseReducerActions.UPDATE_FIELD_OPTIONS, fieldName, options });
+  },
+  
   resetForm: () => {
     dispatch({ type: baseReducerActions.RESET_FORM });
   }
@@ -92,17 +126,15 @@ export const createCombinedInitialState = (sourceInitialState) => ({
 // Base provider component that can be extended
 // Instead of creating the entire provider, this now returns the building blocks
 // that each context can use to create its own provider with custom useEffects
-export const createDataSourceBuilders = (initialState, reducer, fields) => {
+export const createDataSourceBuilders = (initialState, reducer) => {
   const combinedInitialState = createCombinedInitialState(initialState);
   const combinedReducer = createCombinedReducer(reducer);
   
   return {
     combinedInitialState,
     combinedReducer,
-    fields,
     createContextValue: (state, dispatch) => ({
       state,
-      fields,
       ...createBaseActions(dispatch),
       dispatch
     })

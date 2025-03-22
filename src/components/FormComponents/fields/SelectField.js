@@ -10,7 +10,8 @@ const SelectField = ({
   onChange, 
   onBlur,
   error, 
-  disabled = false 
+  disabled = false,
+  loading = false
 }) => {
   const handleChange = useFieldChangeHandler(field.name, onChange);
 
@@ -22,11 +23,15 @@ const SelectField = ({
         value={value || ''}
         onChange={handleChange}
         onBlur={onBlur}
-        disabled={disabled}
+        disabled={disabled || loading}
         hasError={!!error}
+        data-loading={loading}
+        style={loading ? { opacity: 0.7, cursor: 'wait' } : {}}
       >
-        <option value="">Select {field.label}</option>
-        {field.options && field.options.map(option => (
+        <option value="">
+          {loading ? 'Loading...' : `Select ${field.label}`}
+        </option>
+        {!loading && field.options && field.options.map(option => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

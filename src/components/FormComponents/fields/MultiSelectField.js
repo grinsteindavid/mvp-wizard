@@ -6,7 +6,8 @@ const MultiSelectField = ({
   value, 
   onChange, 
   error, 
-  disabled = false 
+  disabled = false,
+  loading = false
 }) => {
   const handleChange = (e) => {
     const options = e.target.options;
@@ -28,11 +29,16 @@ const MultiSelectField = ({
         multiple
         value={Array.isArray(value) ? value : []}
         onChange={handleChange}
-        disabled={disabled}
+        disabled={disabled || loading}
         hasError={!!error}
         size={field.size || 5}
+        data-loading={loading}
+        style={loading ? { opacity: 0.7, cursor: 'wait' } : {}}
       >
-        {field.options && field.options.map(option => (
+        {loading && (
+          <option disabled>Loading options...</option>
+        )}
+        {!loading && field.options && field.options.map(option => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

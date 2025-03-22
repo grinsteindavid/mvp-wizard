@@ -8,8 +8,9 @@ import { FormContainer } from './styled/FormElements';
  * DynamicForm component that renders a form based on a configuration object.
  * Supports different field types including groups and arrays.
  * Now with field-level validation using the validateField function from field definitions.
+ * Also supports loading state for fields.
  */
-const DynamicForm = ({ fields, values, onChange, errors, onValidate }) => {
+const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFields = {} }) => {
   // Local state for field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
   
@@ -119,6 +120,7 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate }) => {
                 onChange={handleFieldChange}
                 onBlur={handleBlur}
                 error={fieldError}
+                loading={loadingFields[fieldName]}
               />
             );
         }

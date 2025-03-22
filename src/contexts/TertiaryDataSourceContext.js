@@ -23,7 +23,76 @@ const initialState = {
   // Available options for selection - not part of schema validation
   availableObjectives: [],
   availableBudgetTypes: [],
-  availableBiddingStrategies: []
+  availableBiddingStrategies: [],
+  fields: {
+    projectName: {
+      label: 'Project Name',
+      type: 'text',
+      required: true,
+      validateField: (value, formData) => validateField('tertiary', 'projectName', value, formData)
+    },
+    projectObjective: {
+      label: 'Project Objective',
+      type: 'select',
+      required: true,
+      validateField: (value, formData) => validateField('tertiary', 'projectObjective', value, formData)
+    },
+    startDate: {
+      label: 'Start Date',
+      type: 'date',
+      required: true,
+      validateField: (value, formData) => validateField('tertiary', 'startDate', value, formData)
+    },
+    endDate: {
+      label: 'End Date',
+      type: 'date',
+      required: false,
+      validateField: (value, formData) => validateField('tertiary', 'endDate', value, formData)
+    },
+    budget: {
+      label: 'Budget',
+      type: 'group',
+      validateField: (value, formData) => validateField('tertiary', 'budget', value, formData),
+      fields: {
+        amount: {
+          label: 'Amount',
+          type: 'number',
+          required: true,
+          validateField: (value, formData) => validateField('tertiary', 'budget.amount', value, formData)
+        },
+        type: {
+          label: 'Budget Type',
+          type: 'select',
+          required: true,
+          options: [
+            { value: 'daily', label: 'Daily Budget' },
+            { value: 'lifetime', label: 'Lifetime Budget' }
+          ],
+          validateField: (value, formData) => validateField('tertiary', 'budget.type', value, formData)
+        }
+      }
+    },
+    bidding: {
+      label: 'Bidding',
+      type: 'group',
+      validateField: (value, formData) => validateField('tertiary', 'bidding', value, formData),
+      fields: {
+        strategy: {
+          label: 'Bidding Strategy',
+          type: 'select',
+          required: true,
+          validateField: (value, formData) => validateField('tertiary', 'bidding.strategy', value, formData)
+        },
+        amount: {
+          label: 'Bid Amount',
+          type: 'number',
+          required: false,
+          dependsOn: { field: 'strategy', value: 'manual' },
+          validateField: (value, formData) => validateField('tertiary', 'bidding.amount', value, formData)
+        }
+      }
+    }
+  }
 };
 
 // Tertiary-specific reducer actions
@@ -77,84 +146,13 @@ const tertiaryReducer = (state, action) => {
   }
 };
 
-// Field definitions for Tertiary Data Source - aligned with tertiarySchema
-// Validation is connected directly to the schema
-const tertiaryFields = {
-  projectName: {
-    label: 'Project Name',
-    type: 'text',
-    required: true,
-    validateField: (value, formData) => validateField('tertiary', 'projectName', value, formData)
-  },
-  projectObjective: {
-    label: 'Project Objective',
-    type: 'select',
-    required: true,
-    validateField: (value, formData) => validateField('tertiary', 'projectObjective', value, formData)
-  },
-  startDate: {
-    label: 'Start Date',
-    type: 'date',
-    required: true,
-    validateField: (value, formData) => validateField('tertiary', 'startDate', value, formData)
-  },
-  endDate: {
-    label: 'End Date',
-    type: 'date',
-    required: false,
-    validateField: (value, formData) => validateField('tertiary', 'endDate', value, formData)
-  },
-  budget: {
-    label: 'Budget',
-    type: 'group',
-    validateField: (value, formData) => validateField('tertiary', 'budget', value, formData),
-    fields: {
-      amount: {
-        label: 'Amount',
-        type: 'number',
-        required: true,
-        validateField: (value, formData) => validateField('tertiary', 'budget.amount', value, formData)
-      },
-      type: {
-        label: 'Budget Type',
-        type: 'select',
-        required: true,
-        options: [
-          { value: 'daily', label: 'Daily Budget' },
-          { value: 'lifetime', label: 'Lifetime Budget' }
-        ],
-        validateField: (value, formData) => validateField('tertiary', 'budget.type', value, formData)
-      }
-    }
-  },
-  bidding: {
-    label: 'Bidding',
-    type: 'group',
-    validateField: (value, formData) => validateField('tertiary', 'bidding', value, formData),
-    fields: {
-      strategy: {
-        label: 'Bidding Strategy',
-        type: 'select',
-        required: true,
-        validateField: (value, formData) => validateField('tertiary', 'bidding.strategy', value, formData)
-      },
-      amount: {
-        label: 'Bid Amount',
-        type: 'number',
-        required: false,
-        dependsOn: { field: 'strategy', value: 'manual' },
-        validateField: (value, formData) => validateField('tertiary', 'bidding.amount', value, formData)
-      }
-    }
-  }
-};
-
 // Get the building blocks from the base context
-const builders = createDataSourceBuilders(initialState, tertiaryReducer, tertiaryFields);
+const builders = createDataSourceBuilders(initialState, tertiaryReducer);
 
 // Create the provider component with custom side effects
 export const TertiaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
+  const baseContextValue = builders.createContextValue(state, dispatch);
   
   // Tertiary-specific actions
   const updateBudget = (field, value) => {
@@ -181,8 +179,6 @@ export const TertiaryDataSourceProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-
-        
         // Load objectives
         const {data: objectives} = await tertiaryDataService.getObjectives();
         setObjectives(objectives);
@@ -200,13 +196,14 @@ export const TertiaryDataSourceProvider = ({ children }) => {
   
   // Create the context value with base actions and tertiary-specific actions
   const contextValue = {
-    ...builders.createContextValue(state, dispatch),
+    ...baseContextValue,
     updateBudget,
     updateBidding,
-
     setObjectives,
     setBudgetTypes,
-    setBiddingStrategies
+    setBiddingStrategies,
+    fields: state.fields || builders.fields,
+    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
   };
   
   return (

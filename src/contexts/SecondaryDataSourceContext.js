@@ -18,7 +18,52 @@ const initialState = {
   },
   // Available options for selection - not part of schema validation
   availableCountries: [],
-  availableDevices: []
+  availableDevices: [],
+  fields: {
+    projectName: {
+      label: 'Project Name',
+      type: 'text',
+      required: true,
+      validateField: (value, formData) => validateField('secondary', 'projectName', value, formData)
+    },
+    targetUrl: {
+      label: 'Target URL',
+      type: 'url',
+      required: true,
+      validateField: (value, formData) => validateField('secondary', 'targetUrl', value, formData)
+    },
+    bidAmount: {
+      label: 'Bid Amount',
+      type: 'number',
+      required: true,
+      validateField: (value, formData) => validateField('secondary', 'bidAmount', value, formData)
+    },
+    dailyBudget: {
+      label: 'Daily Budget',
+      type: 'number',
+      required: true,
+      validateField: (value, formData) => validateField('secondary', 'dailyBudget', value, formData)
+    },
+    targeting: {
+      label: 'Targeting',
+      type: 'group',
+      validateField: (value, formData) => validateField('secondary', 'targeting', value, formData),
+      fields: {
+        countries: {
+          label: 'Countries',
+          type: 'multiselect',
+          required: true,
+          validateField: (value, formData) => validateField('secondary', 'targeting.countries', value, formData)
+        },
+        devices: {
+          label: 'Devices',
+          type: 'checkboxes',
+          required: true,
+          validateField: (value, formData) => validateField('secondary', 'targeting.devices', value, formData)
+        }
+      }
+    }
+  }
 };
 
 // Secondary-specific reducer actions
@@ -57,67 +102,19 @@ const secondaryReducer = (state, action) => {
   }
 };
 
-// Field definitions for Secondary Data Source - aligned with secondarySchema
-// Validation is connected directly to the schema
-const secondaryFields = {
-  projectName: {
-    label: 'Project Name',
-    type: 'text',
-    required: true,
-    validateField: (value, formData) => validateField('secondary', 'projectName', value, formData)
-  },
-  targetUrl: {
-    label: 'Target URL',
-    type: 'url',
-    required: true,
-    validateField: (value, formData) => validateField('secondary', 'targetUrl', value, formData)
-  },
-  bidAmount: {
-    label: 'Bid Amount',
-    type: 'number',
-    required: true,
-    validateField: (value, formData) => validateField('secondary', 'bidAmount', value, formData)
-  },
-  dailyBudget: {
-    label: 'Daily Budget',
-    type: 'number',
-    required: true,
-    validateField: (value, formData) => validateField('secondary', 'dailyBudget', value, formData)
-  },
-  targeting: {
-    label: 'Targeting',
-    type: 'group',
-    validateField: (value, formData) => validateField('secondary', 'targeting', value, formData),
-    fields: {
-      countries: {
-        label: 'Countries',
-        type: 'multiselect',
-        required: true,
-        validateField: (value, formData) => validateField('secondary', 'targeting.countries', value, formData)
-      },
-      devices: {
-        label: 'Devices',
-        type: 'checkboxes',
-        required: true,
-        validateField: (value, formData) => validateField('secondary', 'targeting.devices', value, formData)
-      }
-    }
-  }
-};
 
 // Get the building blocks from the base context
-const builders = createDataSourceBuilders(initialState, secondaryReducer, secondaryFields);
+const builders = createDataSourceBuilders(initialState, secondaryReducer);
 
 // Create the provider component with custom side effects
 export const SecondaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
+  const baseContextValue = builders.createContextValue(state, dispatch);
   
   // Secondary-specific actions
   const updateTargeting = (field, value) => {
     dispatch({ type: secondaryActions.UPDATE_TARGETING, field, value });
   };
-  
-
   
   const setCountries = (countries) => {
     dispatch({ type: secondaryActions.SET_COUNTRIES, payload: countries });
@@ -131,8 +128,6 @@ export const SecondaryDataSourceProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
-
-        
         // Load countries for targeting
         const {data: countries} = await secondaryDataService.getCountries();
         setCountries(countries);
@@ -150,11 +145,12 @@ export const SecondaryDataSourceProvider = ({ children }) => {
   
   // Create the context value with base actions and secondary-specific actions
   const contextValue = {
-    ...builders.createContextValue(state, dispatch),
+    ...baseContextValue,
     updateTargeting,
-
     setCountries,
-    setDevices
+    setDevices,
+    fields: state.fields || builders.fields,
+    isFieldLoading: (fieldName) => state.loadingFields && state.loadingFields[fieldName] === true,
   };
   
   return (
