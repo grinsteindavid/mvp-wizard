@@ -1,6 +1,7 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { fieldTypeMap } from './fields';
 import { FieldContainer } from './styled/FormElements';
+import withFieldMemoization from './fields/withFieldMemoization';
 
 /**
  * Generic form field component that renders the appropriate field component
@@ -39,14 +40,5 @@ const FormField = ({
   );
 };
 
-// Memoize the component to prevent unnecessary re-renders
-export default memo(FormField, (prevProps, nextProps) => {
-  // Custom comparison function to determine if the component should re-render
-  return (
-    prevProps.value === nextProps.value &&
-    prevProps.error === nextProps.error &&
-    prevProps.disabled === nextProps.disabled &&
-    prevProps.field.type === nextProps.field.type &&
-    prevProps.onBlur === nextProps.onBlur
-  );
-});
+// Export the component wrapped with withFieldMemoization for consistent memoization
+export default withFieldMemoization(FormField);
