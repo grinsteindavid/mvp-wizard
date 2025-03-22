@@ -52,12 +52,14 @@ const initialState = {
         countries: {
           label: 'Countries',
           type: 'multiselect',
+          options: [],
           required: true,
           validateField: (value, formData) => validateField('secondary', 'targeting.countries', value, formData)
         },
         devices: {
           label: 'Devices',
           type: 'checkboxes',
+          options: [],
           required: true,
           validateField: (value, formData) => validateField('secondary', 'targeting.devices', value, formData)
         }
@@ -128,15 +130,26 @@ export const SecondaryDataSourceProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Set loading state
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: true });
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: true });
+        
         // Load countries for targeting
         const {data: countries} = await secondaryDataService.getCountries();
         setCountries(countries);
+        baseContextValue.updateFieldOptions('targeting.countries', countries);
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: false });
         
         // Load devices for targeting
         const {data: devices} = await secondaryDataService.getDevices();
         setDevices(devices);
+        baseContextValue.updateFieldOptions('targeting.devices', devices);
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: false });
       } catch (error) {
         console.error('Error loading data from services:', error);
+        // Clear loading states on error
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.countries', isLoading: false });
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'targeting.devices', isLoading: false });
       }
     };
     

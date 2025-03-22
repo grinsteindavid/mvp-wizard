@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer } from 'react';
+import { setNestedValue } from '../utils/formUtils';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -25,10 +26,7 @@ const baseReducerActions = {
 const baseReducer = (state, action) => {
   switch (action.type) {
     case baseReducerActions.UPDATE_FIELD:
-      return {
-        ...state,
-        [action.field]: action.value
-      };
+      return setNestedValue(state, action.field, action.value);
     case baseReducerActions.SET_VALIDATION_RESULT:
       return {
         ...state,
@@ -54,19 +52,26 @@ const baseReducer = (state, action) => {
         }
       };
     case baseReducerActions.UPDATE_FIELD_OPTIONS:
-      // Create a new fields object with updated options for the specified field
-      const updatedFields = {
-        ...state.fields,
-        [action.fieldName]: {
-          ...state.fields?.[action.fieldName],
-          options: action.options
-        }
-      };
-      console.log('Updated fields:', state,updatedFields);
-      return {
-        ...state,
-        fields: updatedFields
-      };
+      // For nested fields like 'bidding.strategy'
+      const parts = action.fieldName.split('.');
+      
+      if (parts.length === 1) {
+        // Simple case - direct field in fields object
+        return {
+          ...state,
+          fields: {
+            ...state.fields,
+            [action.fieldName]: {
+              ...state.fields?.[action.fieldName],
+              options: action.options
+            }
+          }
+        };
+      } else {
+        // For nested fields, construct the full path to the options property
+        const optionsPath = `fields.${parts.join('.fields.')}.options`;
+        return setNestedValue(state, optionsPath, action.options);
+      }
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
     default:
@@ -100,7 +105,6 @@ export const createBaseActions = (dispatch) => ({
   },
   
   updateFieldOptions: (fieldName, options) => {
-    console.log('Updating field options:', fieldName, options);
     dispatch({ type: baseReducerActions.UPDATE_FIELD_OPTIONS, fieldName, options });
   },
   

@@ -35,6 +35,7 @@ const initialState = {
       label: 'Project Objective',
       type: 'select',
       required: true,
+      options: [],
       validateField: (value, formData) => validateField('tertiary', 'projectObjective', value, formData)
     },
     startDate: {
@@ -80,6 +81,7 @@ const initialState = {
         strategy: {
           label: 'Bidding Strategy',
           type: 'select',
+          options: [],
           required: true,
           validateField: (value, formData) => validateField('tertiary', 'bidding.strategy', value, formData)
         },
@@ -179,20 +181,34 @@ export const TertiaryDataSourceProvider = ({ children }) => {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Set loading state for fields
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: true });
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: true });
+        
         // Load objectives
         const {data: objectives} = await tertiaryDataService.getObjectives();
         setObjectives(objectives);
+        baseContextValue.updateFieldOptions('projectObjective', objectives);
         
         // Load bidding strategies
         const {data: strategies} = await tertiaryDataService.getBiddingStrategies();
         setBiddingStrategies(strategies);
+        baseContextValue.updateFieldOptions('bidding.strategy', strategies);
+        
+        // Clear loading states
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: false });
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: false });
       } catch (error) {
         console.error('Error loading data from services:', error);
+        // Clear loading states on error
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'projectObjective', isLoading: false });
+        dispatch({ type: baseActions.SET_FIELD_LOADING, field: 'bidding.strategy', isLoading: false });
       }
     };
     
     loadData();
   }, []);
+
   
   // Create the context value with base actions and tertiary-specific actions
   const contextValue = {
