@@ -13,10 +13,6 @@ class TertiaryDataService extends BaseDataService {
         { value: 'awareness', label: 'Brand Awareness' },
         { value: 'conversions', label: 'Conversions' }
       ],
-      budgetTypes: [
-        { value: 'daily', label: 'Daily Budget' },
-        { value: 'lifetime', label: 'Lifetime Budget' }
-      ],
       biddingStrategies: [
         { value: 'manual', label: 'Manual Bidding' },
         { value: 'auto', label: 'Automatic Bidding' }
@@ -31,14 +27,6 @@ class TertiaryDataService extends BaseDataService {
    */
   getObjectives() {
     return this.httpService.get('/api/tertiary/objectives', this.mockData.objectives);
-  }
-
-  /**
-   * Get all budget types
-   * @returns {Promise} - Promise that resolves with the budget types
-   */
-  getBudgetTypes() {
-    return this.httpService.get('/api/tertiary/budget-types', this.mockData.budgetTypes);
   }
 
   /**

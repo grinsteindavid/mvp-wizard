@@ -119,6 +119,10 @@ const tertiaryFields = {
         label: 'Budget Type',
         type: 'select',
         required: true,
+        options: [
+          { value: 'daily', label: 'Daily Budget' },
+          { value: 'lifetime', label: 'Lifetime Budget' }
+        ],
         validateField: (value, formData) => validateField('tertiary', 'budget.type', value, formData)
       }
     }
@@ -161,8 +165,6 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     dispatch({ type: tertiaryActions.UPDATE_BIDDING, field, value });
   };
   
-
-  
   const setObjectives = (objectives) => {
     dispatch({ type: tertiaryActions.SET_OBJECTIVES, payload: objectives });
   };
@@ -184,10 +186,6 @@ export const TertiaryDataSourceProvider = ({ children }) => {
         // Load objectives
         const {data: objectives} = await tertiaryDataService.getObjectives();
         setObjectives(objectives);
-        
-        // Load budget types
-        const {data: budgetTypes} = await tertiaryDataService.getBudgetTypes();
-        setBudgetTypes(budgetTypes);
         
         // Load bidding strategies
         const {data: strategies} = await tertiaryDataService.getBiddingStrategies();
