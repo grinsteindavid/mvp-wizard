@@ -75,6 +75,13 @@
 - Use console.log statements for debugging and development environment only
 - Be conscious of performance implications when using timers
 - Timers can create race conditions and unexpected behavior
+- Be aware of stale closures/references in React, especially in complex array forms
+  - Functions in event handlers may capture outdated state/props values
+  - Use useRef for mutable references that don't trigger re-renders
+  - Include dependencies in useEffect/useCallback dependency arrays
+  - Be cautious with closures in array mapping functions
+  - Properly key array items to ensure correct component identity
+  - Consider using function form of setState: setState(prev => newState)
 
 ## State Management
 - Use Context API for global state that changes infrequently
@@ -135,3 +142,36 @@
 - Support reduced motion preferences
 - Implement focus management for modals and dialogs
 - Create accessible form components
+
+## UI Component Best Practices
+
+### Visual Hierarchy
+- Use consistent spacing system (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- Implement clear visual hierarchy with font sizes and weights
+- Maintain proper alignment (left-align text, right-align numbers)
+- Use whitespace effectively to create breathing room
+- Limit color palette to 3 primary colors with light/dark variants
+- Ensure text has sufficient contrast (WCAG AA minimum)
+- Design for all viewport sizes with responsive breakpoints
+
+### Interactive Elements
+- Provide clear hover/focus/active states for all interactive elements
+- Implement loading states for asynchronous operations
+- Design empty states for lists and data displays
+- Create meaningful error states with actionable guidance
+- Use micro-interactions to provide feedback (animations < 300ms)
+- Maintain touch target size of at least 44×44px for mobile
+
+### Animation & Transitions
+- Keep animations subtle and purposeful
+- Use transitions for state changes (150-300ms duration)
+- Implement reduced motion options for accessibility
+- Avoid animations that could trigger vestibular disorders
+- Use spring physics for natural-feeling animations
+
+### Component Design
+- Create self-contained components with clear boundaries
+- Design components to be composable and flexible
+- Implement consistent prop patterns across component library
+- Provide sensible defaults while allowing customization
+
