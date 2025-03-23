@@ -71,11 +71,23 @@ const ReviewStep = ({ dataSourceContext }) => {
   // Memoize the field values rendering for better performance
   const preparedFields = useMemo(() => {
     // Safe check for currentSource and its fields
-    const fields = currentSource?.state.fields || {};
-    const projectData = currentSource?.state || {};
+    if (!currentSource || !currentSource.state || !currentSource.state.fields) {
+      console.error('Missing data source or fields in ReviewStep');
+      return [];
+    }
+    
+    const fields = currentSource.state.fields;
+    
+    // Log the fields for debugging
+    console.log('Fields in ReviewStep:', fields);
     
     return Object.keys(fields).map(fieldName => {
-      return prepareFieldValue(fieldName, projectData[fieldName], fields);
+      // For each field, get its value from the field definition itself
+      const fieldValue = fields[fieldName].value;
+      console.log(`Processing field ${fieldName}:`, { value: fieldValue, definition: fields[fieldName] });
+      
+      // Prepare the field data for rendering
+      return prepareFieldValue(fieldName, fieldValue, fields);
     }).filter(Boolean); // Filter out null entries
   }, [currentSource]);
   

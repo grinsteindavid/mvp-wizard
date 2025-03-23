@@ -56,33 +56,53 @@ export const prepareFieldValue = (name, value, fields, parentPath = '') => {
   const currentPath = parentPath ? `${parentPath}.${name}` : name;
   
   if (field.type === 'group') {
+    // For group fields, we need to process each child field
+    // Make sure value is an object before trying to access its properties
+    const groupValue = value && typeof value === 'object' ? value : {};
+    
     return {
       type: 'group',
       key: currentPath,
       label: field.label,
-      children: value && Object.entries(field.fields).map(([childName, childField]) => {
-        return prepareFieldValue(childName, value[childName], field.fields, currentPath);
-      }).filter(Boolean)
+      children: Object.keys(field.fields).map(childName => {
+        // Use field.fields[childName] for the child field definition
+        // and groupValue[childName] for the child field value
+        return prepareFieldValue(
+          childName, 
+          groupValue[childName], 
+          field.fields, 
+          currentPath
+        );
+      }).filter(Boolean) // Filter out null values
     };
   }
   
   if (field.type === 'array') {
+    // For array fields, make sure value is an array before processing
+    const arrayValue = Array.isArray(value) ? value : [];
+    
     return {
       type: 'array',
       key: currentPath,
       label: field.label,
-      count: value ? value.length : 0,
-      items: value && value.map((item, index) => ({
+      count: arrayValue.length,
+      items: arrayValue.map((item, index) => ({
         index,
-        fields: Object.entries(field.fields).map(([childName, childField]) => ({
-          key: `${currentPath}-${index}-${childName}`,
-          label: childField.label,
-          value: formatValue(item[childName], childField)
-        }))
+        fields: Object.keys(field.fields).map(childName => {
+          const childField = field.fields[childName];
+          const childValue = item && typeof item === 'object' ? item[childName] : undefined;
+          
+          return {
+            key: `${currentPath}-${index}-${childName}`,
+            label: childField.label,
+            value: formatValue(childValue, childField)
+          };
+        })
       }))
     };
   }
   
+  // For simple fields, just return the formatted value
   return {
     type: 'simple',
     key: currentPath,
