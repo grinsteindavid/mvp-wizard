@@ -12,7 +12,8 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: ''
+      value: '',
+      description: 'A unique name to identify your advertising project'
     },
     projectObjective: {
       label: 'Project Objective',
@@ -20,29 +21,34 @@ const initialState = {
       required: true,
       value: '',
       loading: false, // Initialize loading state
-      options: []
+      options: [],
+      description: 'The primary goal you want to achieve with this campaign'
     },
     startDate: {
       label: 'Start Date',
       type: 'date',
       required: true,
-      value: ''
+      value: '',
+      description: 'When your advertising campaign should begin'
     },
     endDate: {
       label: 'End Date',
       type: 'date',
       required: false,
-      value: ''
+      value: '',
+      description: 'When your advertising campaign should end (optional)'
     },
     budget: {
       label: 'Budget',
       type: 'group',
+      description: 'Financial resources allocated to your advertising campaign',
       fields: {
         amount: {
           label: 'Amount',
           type: 'number',
           required: true,
-          value: ''
+          value: '',
+          description: 'The amount of money to allocate to this campaign'
         },
         type: {
           label: 'Budget Type',
@@ -52,13 +58,15 @@ const initialState = {
           options: [
             { value: 'daily', label: 'Daily Budget' },
             { value: 'lifetime', label: 'Lifetime Budget' }
-          ]
+          ],
+          description: 'Whether the budget is spent per day or over the entire campaign'
         }
       }
     },
     bidding: {
       label: 'Bidding',
       type: 'group',
+      description: 'How you\'ll bid for ad placements in auctions',
       fields: {
         strategy: {
           label: 'Bidding Strategy',
@@ -66,14 +74,16 @@ const initialState = {
           options: [],
           required: true,
           value: '',
-          loading: false // Initialize loading state
+          loading: false, // Initialize loading state
+          description: 'The approach used to determine bid amounts'
         },
         amount: {
           label: 'Bid Amount',
           type: 'number',
           required: false,
           value: '',
-          dependsOn: { field: 'strategy', value: 'manual' }
+          dependsOn: { field: 'strategy', value: 'manual' },
+          description: 'The specific amount you\'re willing to bid (only for manual strategy)'
         }
       }
     }

@@ -12,29 +12,34 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: ''
+      value: '',
+      description: 'A unique name to identify your content campaign'
     },
     targetUrl: {
       label: 'Target URL',
       type: 'url',
       required: true,
-      value: ''
+      value: '',
+      description: 'The webpage users will arrive at after clicking your ad'
     },
     bidAmount: {
       label: 'Bid Amount',
       type: 'number',
       required: true,
-      value: ''
+      value: '',
+      description: 'Maximum amount you\'re willing to pay per click'
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
-      value: ''
+      value: '',
+      description: 'Maximum amount to spend per day on this campaign'
     },
     targeting: {
       label: 'Targeting',
       type: 'group',
+      description: 'Define the audience segments your ads will reach',
       fields: {
         countries: {
           label: 'Countries',
@@ -42,7 +47,8 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false // Initialize loading state
+          loading: false, // Initialize loading state
+          description: 'Geographic locations where your ads will be shown'
         },
         devices: {
           label: 'Devices',
@@ -50,7 +56,8 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false // Initialize loading state
+          loading: false, // Initialize loading state
+          description: 'Types of devices your ads will appear on'
         }
       }
     }

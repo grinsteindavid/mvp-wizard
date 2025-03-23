@@ -12,13 +12,15 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: ''
+      value: '',
+      description: 'A unique name to identify your advertising project'
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
-      value: ''
+      value: '',
+      description: 'Maximum amount to spend per day on this advertising campaign'
     },
     bidStrategy: {
       label: 'Bid Strategy',
@@ -26,14 +28,16 @@ const initialState = {
       required: true,
       value: '',
       loading: false, // Initialize loading state
-      options: [] // Will be populated via dispatch when strategies are loaded
+      options: [], // Will be populated via dispatch when strategies are loaded
+      description: 'Strategy that determines how bids are set for your ads'
     },
     keywords: {
       label: 'Keywords',
       type: 'textarea',
       required: true,
       value: '',
-      placeholder: 'Enter keywords separated by commas'
+      placeholder: 'Enter keywords separated by commas',
+      description: 'Words or phrases that match your ads with user searches'
     },
     categoryGroups: {
       label: 'Category Groups',
@@ -41,16 +45,19 @@ const initialState = {
       required: true,
       value: [],
       loading: false, // Initialize loading state
+      description: 'Groups of related product categories for targeting',
       fields: {
         name: {
           label: 'Group Name',
           type: 'text',
-          required: true
+          required: true,
+          description: 'Name for this category group'
         },
         cpc: {
           label: 'Max CPC',
           type: 'number',
-          required: true
+          required: true,
+          description: 'Maximum cost-per-click bid for this category group'
         }
       }
     }

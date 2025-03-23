@@ -17,6 +17,24 @@ export const Label = styled.label`
     color: #e53935;
     font-weight: bold;
   }
+  
+  .description-indicator {
+    color: white;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #4285f4;
+    font-size: 12px;
+    cursor: help;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 10;
+  }
 `;
 
 export const Input = styled.input`
