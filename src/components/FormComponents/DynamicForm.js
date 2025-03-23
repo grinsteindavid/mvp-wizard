@@ -46,8 +46,6 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
 
   const handleFieldChange = (name, value) => {
     // Update the form values by directly passing field name and value
-    console.log('name', name);
-    console.log('value', value);
     onChange(name, value);
     
     // Validate the field after a short delay to allow for typing
@@ -115,6 +113,7 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
                 onBlur={handleBlur}
                 error={fieldError}
                 loading={field.loading}
+                useDebouncing={true}
               />
             );
         }

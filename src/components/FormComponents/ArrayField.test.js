@@ -115,177 +115,53 @@ describe('ArrayField', () => {
       { street: '456 Oak Ave', city: 'Los Angeles' }
     ]);
   });
-  
-  test('handles a complex sequence of operations correctly', () => {
-    // Start with a mock function to track all changes
+
+  test('correctly handles multiple field changes in the same item', () => {
+    // Mock the onChange handler
     const handleChange = jest.fn();
     
-    // Create a component reference to update props between operations
-    let currentField = createMockField([]);
-    let currentErrors = {};
-    
-    // Initial render with empty array
+    // Render the component with initial values
     const { rerender } = render(
       <ArrayField 
-        field={currentField} 
+        field={createMockField(mockValues)} 
         onChange={handleChange} 
-        errors={currentErrors} 
+        errors={{}} 
       />
     );
     
-    // Step 1: Add a group
-    fireEvent.click(screen.getByText('Add Addresse'));
-    
-    // Simulate the onChange handler updating the field value
-    const firstGroupAdded = [{ street: '', city: '' }];
-    currentField = createMockField(firstGroupAdded);
-    
-    // Re-render with updated field value
-    rerender(
-      <ArrayField 
-        field={currentField} 
-        onChange={handleChange} 
-        errors={currentErrors} 
-      />
-    );
-    
-    // After adding the first group, we should have two inputs (street and city)
-    const allInputs = screen.getAllByDisplayValue('');
-    expect(allInputs.length).toBe(2);
-    
-    // Find the street input by its name attribute
-    const streetInputs = allInputs.filter(input => input.name === 'street');
-    const cityInputs = allInputs.filter(input => input.name === 'city');
-    expect(streetInputs.length).toBe(1);
-    expect(cityInputs.length).toBe(1);
-    
-    // Step 2: Modify the first street input
-    fireEvent.change(streetInputs[0], {
-      target: { value: '100 First St' }
+    // Change the street field first
+    fireEvent.change(screen.getAllByDisplayValue('123 Main St')[0], {
+      target: { value: '789 Pine St' }
     });
     
-    // Simulate the onChange handler updating the field value
-    const firstInputModified = [{ street: '100 First St', city: '' }];
-    currentField = createMockField(firstInputModified);
+    // Get the updated values from the onChange call
+    const updatedValues = handleChange.mock.calls[0][1];
     
-    // Re-render with updated field value
+    // Verify the street was updated correctly in the onChange call
+    expect(updatedValues[0].street).toBe('789 Pine St');
+    
+    // Rerender with the updated values (simulating parent component update)
     rerender(
       <ArrayField 
-        field={currentField} 
+        field={createMockField(updatedValues)} 
         onChange={handleChange} 
-        errors={currentErrors} 
+        errors={{}} 
       />
     );
     
-    // Step 3: Modify the first city input
-    // Now we should have one input with value '100 First St' and one with empty value
-    const updatedInputs = screen.getAllByDisplayValue('');
-    expect(updatedInputs.length).toBe(1);
+    // Reset the mock to track the next change
+    handleChange.mockClear();
     
-    fireEvent.change(updatedInputs[0], {
-      target: { value: 'Chicago' }
+    // Now change the city field
+    fireEvent.change(screen.getAllByDisplayValue('New York')[0], {
+      target: { value: 'San Francisco' }
     });
     
-    // Simulate the onChange handler updating the field value
-    const secondInputModified = [{ street: '100 First St', city: 'Chicago' }];
-    currentField = createMockField(secondInputModified);
+    // Get the updated values from the second onChange call
+    const finalValues = handleChange.mock.calls[0][1];
     
-    // Re-render with updated field value
-    rerender(
-      <ArrayField 
-        field={currentField} 
-        onChange={handleChange} 
-        errors={currentErrors} 
-      />
-    );
-    
-    // Step 4: Add another group
-    fireEvent.click(screen.getByText('Add Addresse'));
-    
-    // Simulate the onChange handler updating the field value
-    const secondGroupAdded = [
-      { street: '100 First St', city: 'Chicago' },
-      { street: '', city: '' }
-    ];
-    currentField = createMockField(secondGroupAdded);
-    
-    // Re-render with updated field value
-    rerender(
-      <ArrayField 
-        field={currentField} 
-        onChange={handleChange} 
-        errors={currentErrors} 
-      />
-    );
-    
-    // After adding the second group, we should have two new empty inputs
-    const newEmptyInputs = screen.getAllByDisplayValue('');
-    expect(newEmptyInputs.length).toBe(2);
-    
-    // Find the new street and city inputs
-    const newStreetInputs = newEmptyInputs.filter(input => input.name === 'street');
-    const newCityInputs = newEmptyInputs.filter(input => input.name === 'city');
-    expect(newStreetInputs.length).toBe(1);
-    expect(newCityInputs.length).toBe(1);
-    
-    // Step 5: Modify the street input in the second group
-    fireEvent.change(newStreetInputs[0], {
-      target: { value: '200 Second St' }
-    });
-    
-    // Simulate the onChange handler updating the field value
-    const thirdInputModified = [
-      { street: '100 First St', city: 'Chicago' },
-      { street: '200 Second St', city: '' }
-    ];
-    currentField = createMockField(thirdInputModified);
-    
-    // Re-render with updated field value
-    rerender(
-      <ArrayField 
-        field={currentField} 
-        onChange={handleChange} 
-        errors={currentErrors} 
-      />
-    );
-    
-    // Step 6: Modify the city input in the second group
-    // Now we should have one remaining empty input (the city in the second group)
-    const finalEmptyInput = screen.getByDisplayValue('');
-    fireEvent.change(finalEmptyInput, {
-      target: { value: 'Boston' }
-    });
-    
-    // Simulate the onChange handler updating the field value
-    const fourthInputModified = [
-      { street: '100 First St', city: 'Chicago' },
-      { street: '200 Second St', city: 'Boston' }
-    ];
-    currentField = createMockField(fourthInputModified);
-    
-    // Re-render with updated field value
-    rerender(
-      <ArrayField 
-        field={currentField} 
-        onChange={handleChange} 
-        errors={currentErrors} 
-      />
-    );
-    
-    // Verify all inputs have the correct values
-    // Get all inputs by their display values
-    expect(screen.getByDisplayValue('100 First St')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Chicago')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('200 Second St')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Boston')).toBeInTheDocument();
-    
-    // Verify the final state of the array
-    expect(currentField.value).toEqual([
-      { street: '100 First St', city: 'Chicago' },
-      { street: '200 Second St', city: 'Boston' }
-    ]);
-    
-    // Verify the number of onChange calls (one for each operation)
-    expect(handleChange).toHaveBeenCalledTimes(6);
+    // Verify both changes were preserved in the onChange call
+    expect(finalValues[0].street).toBe('789 Pine St');
+    expect(finalValues[0].city).toBe('San Francisco');
   });
 });

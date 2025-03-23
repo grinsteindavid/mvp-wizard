@@ -35,6 +35,7 @@ const FormGroup = ({ field, onChange, errors }) => {
             onChange={handleFieldChange}
             error={fieldError}
             loading={fieldConfig.loading}
+            useDebouncing={false}
           />
         );
       })}

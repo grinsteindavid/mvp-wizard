@@ -61,7 +61,7 @@ const TextField = ({
         step={field.validation?.step}
         disabled={disabled}
         hasError={!!error}
-        data-debouncing={isDebouncing}
+        data-debouncing={useDebouncing && isDebouncing}
       />
     </BaseField>
   );

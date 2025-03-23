@@ -86,7 +86,7 @@ const ArrayField = ({ field, onChange, errors }) => {
             const formField = {
               ...fieldConfig,
               name: fieldName,
-              value: item[fieldName] || '' // Ensure we always have a value, even if it's empty
+              // Don't set value in the field object, we'll use the value prop instead
             };
             
             // Get any error for this specific field in this specific item
@@ -100,6 +100,7 @@ const ArrayField = ({ field, onChange, errors }) => {
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
                 loading={fieldConfig.loading}
+                useDebouncing={false}
               />
             );
           })}
