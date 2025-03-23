@@ -1,4 +1,5 @@
 import React from 'react';
+import { produce } from 'immer';
 import FormField from './FormField';
 import { 
   ArrayContainer, 
@@ -30,9 +31,10 @@ const ArrayField = ({ field, onChange, errors }) => {
 
   // Add a new item to the array
   const handleAddItem = () => {
-    // Create a deep copy of the current array to avoid reference issues
-    const currentItems = JSON.parse(JSON.stringify(arrayValue));
-    const newItems = [...currentItems, createEmptyItem()];
+    // Use Immer to create an immutable update
+    const newItems = produce(arrayValue, draft => {
+      draft.push(createEmptyItem());
+    });
     
     // Update the entire array at once
     onChange(field.name, newItems);
@@ -40,32 +42,30 @@ const ArrayField = ({ field, onChange, errors }) => {
 
   // Remove an item from the array
   const handleRemoveItem = (index) => {
-    // Create a deep copy of the current array to avoid reference issues
-    const currentItems = JSON.parse(JSON.stringify(arrayValue));
+    // Validate index is within bounds
+    if (index < 0 || index >= arrayValue.length) return;
     
-    // Remove the item at the specified index
-    if (index >= 0 && index < currentItems.length) {
-      currentItems.splice(index, 1);
-      onChange(field.name, currentItems);
-    }
+    // Use Immer to create an immutable update
+    const newItems = produce(arrayValue, draft => {
+      draft.splice(index, 1);
+    });
+    
+    onChange(field.name, newItems);
   };
 
   // Update a field within an item
   const handleItemFieldChange = (index, fieldName, fieldValue) => {
-    // Create a deep copy of the current array to avoid reference issues
-    const currentItems = JSON.parse(JSON.stringify(arrayValue));
+    // Validate index is within bounds
+    if (index < 0 || index >= arrayValue.length) return;
     
-    // Ensure the item exists at this index
-    if (index >= 0 && index < currentItems.length) {
+    // Use Immer to create an immutable update
+    const newItems = produce(arrayValue, draft => {
       // Update the specific field while preserving other fields
-      currentItems[index] = {
-        ...currentItems[index],
-        [fieldName]: fieldValue
-      };
-      
-      // Update the entire array at once
-      onChange(field.name, currentItems);
-    }
+      draft[index][fieldName] = fieldValue;
+    });
+    
+    // Update the entire array at once
+    onChange(field.name, newItems);
   };
 
   // Get array-level error if any

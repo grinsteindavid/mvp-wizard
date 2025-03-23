@@ -113,6 +113,7 @@ export const SecondaryDataSourceProvider = ({ children }) => {
     };
     
     loadData();
+    // eslint-disable-next-line
   }, []);
   
   // Create the context value with base actions and secondary-specific actions

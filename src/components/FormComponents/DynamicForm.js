@@ -27,11 +27,8 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
     // Skip validation if no field or no validation schema
     if (!field || !validationSchema) return;
     
-    // Create a formData object from field values for validation context
-    const formData = createFormDataFromFields(fields);
-    
     // Call the validateField function from validationService
-    const validationResult = validateField(validationSchema, name, value, formData);
+    const validationResult = validateField(validationSchema, name, value);
     
     // Update the local field errors
     setFieldErrors(prev => ({
@@ -47,24 +44,10 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
     return validationResult;
   };
 
-  // Helper function to create a flat form data object from fields with values
-  const createFormDataFromFields = (fieldsObj, prefix = '') => {
-    return Object.entries(fieldsObj).reduce((acc, [key, field]) => {
-      const fieldPath = prefix ? `${prefix}.${key}` : key;
-      
-      if (field.type === 'group' && field.fields) {
-        // For group fields, recursively process nested fields
-        const nestedValues = createFormDataFromFields(field.fields, fieldPath);
-        return { ...acc, [key]: nestedValues, ...nestedValues };
-      } else {
-        // For regular fields, just get the value
-        return { ...acc, [fieldPath]: field.value };
-      }
-    }, {});
-  };
-
   const handleFieldChange = (name, value) => {
     // Update the form values by directly passing field name and value
+    console.log('name', name);
+    console.log('value', value);
     onChange(name, value);
     
     // Validate the field after a short delay to allow for typing
