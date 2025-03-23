@@ -3,6 +3,49 @@ import { fieldTypeMap } from './fields';
 import { FieldContainer } from './styled/FormElements';
 import withFieldMemoization from './fields/withFieldMemoization';
 import RenderCounter from './RenderCounter';
+import styled from 'styled-components';
+
+// Enhanced field container with animations and hover effects
+const EnhancedFieldContainer = styled(FieldContainer)`
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  
+  &:hover {
+    z-index: 1;
+  }
+  
+  &:focus-within {
+    z-index: 2;
+  }
+  
+  ${props => props.isLoading && `
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: #4285f4;
+      opacity: 0.7;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.7;
+      }
+      100% {
+        opacity: 0.3;
+      }
+    }
+  `}
+  
+  /* Removed error top border as requested */
+`;
 
 /**
  * Generic form field component that renders the appropriate field component
@@ -36,9 +79,11 @@ const FormField = ({
   // If no matching component is found, show an error message
   if (!FieldComponent) {
     return (
-      <FieldContainer>
-        <div>Unsupported field type: {field.type}</div>
-      </FieldContainer>
+      <EnhancedFieldContainer hasError={true}>
+        <div style={{ padding: '12px', backgroundColor: '#ffebee', borderRadius: '6px', color: '#c62828' }}>
+          Unsupported field type: <strong>{field.type}</strong>
+        </div>
+      </EnhancedFieldContainer>
     );
   }
   
@@ -49,16 +94,18 @@ const FormField = ({
   
   // Create the field component with all props
   const fieldComponent = (
-    <FieldComponent
-      field={field}
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      error={error}
-      disabled={disabled}
-      loading={loading}
-      useDebouncing={useDebouncing}
-    />
+    <EnhancedFieldContainer isLoading={loading} hasError={!!error}>
+      <FieldComponent
+        field={field}
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        error={error}
+        disabled={disabled}
+        loading={loading}
+        useDebouncing={useDebouncing}
+      />
+    </EnhancedFieldContainer>
   );
   
   // Wrap with render counter if enabled

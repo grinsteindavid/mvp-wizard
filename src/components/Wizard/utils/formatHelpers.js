@@ -45,27 +45,70 @@ export const transformFieldsForValidation = (fields) => {
  * @param {object} field - The field definition containing type and options
  * @returns {string} - The formatted value as a string
  */
-export const formatValue = (value, field) => {
+/**
+ * Format a value for display based on its field type and content
+ * @param {any} value - The value to format
+ * @param {object} field - The field definition containing type and options
+ * @param {object} options - Additional formatting options
+ * @param {boolean} options.shortened - Whether to shorten long values
+ * @returns {string} - The formatted value as a string
+ */
+export const formatValue = (value, field, options = {}) => {
+  // Handle empty values consistently
   if (value === undefined || value === null || value === '') {
-    return 'Not specified';
+    return '—'; // Using em dash for better visual indication of empty value
   }
   
   if (Array.isArray(value)) {
     if (field.type === 'multiselect' || field.type === 'checkboxes') {
-      // For multiselect/checkboxes, map values to labels
-      return value.map(v => {
+      // For multiselect/checkboxes, map values to labels with better formatting
+      const formattedValues = value.map(v => {
         const option = field.options?.find(opt => opt.value === v);
-        return option ? option.label : v;
-      }).join(', ');
+        return option ? option.label : String(v);
+      });
+      
+      // Handle empty array
+      if (formattedValues.length === 0) {
+        return 'None selected';
+      }
+      
+      // For large selections, show a summary if shortened option is enabled
+      if (options.shortened && formattedValues.length > 3) {
+        return `${formattedValues.slice(0, 3).join(', ')} and ${formattedValues.length - 3} more`;
+      }
+      
+      return formattedValues.join(', ');
     } else if (field.type === 'array') {
-      // For array fields, show count
-      return `${value.length} items`;
+      // For array fields, show count with proper pluralization
+      const count = value.length;
+      return count === 0 ? 'No items' : `${count} ${count === 1 ? 'item' : 'items'}`;
+    }
+    
+    // For regular arrays, join with commas but limit length if shortened
+    if (options.shortened && value.length > 5) {
+      return `${value.slice(0, 5).join(', ')} and ${value.length - 5} more`;
     }
     return value.join(', ');
   }
   
   if (typeof value === 'object') {
-    return 'Complex value';
+    // Provide more informative descriptions for complex objects
+    if (value === null) {
+      return 'Not specified';
+    }
+    
+    try {
+      const keys = Object.keys(value);
+      if (keys.length === 0) {
+        return 'Empty object';
+      } else if (keys.length <= 3) {
+        // For simple objects with few properties, show a summary
+        return keys.map(key => `${key}: ${typeof value[key] === 'object' ? '...' : value[key]}`).join(', ');
+      }
+      return `Object with ${keys.length} properties`;
+    } catch (error) {
+      return 'Complex value';
+    }
   }
   
   if (field.type === 'select') {
@@ -75,7 +118,22 @@ export const formatValue = (value, field) => {
   }
   
   if (field.type === 'date') {
-    return new Date(value).toLocaleDateString();
+    try {
+      // Format date with more user-friendly display
+      const date = new Date(value);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      
+      // Use more readable date format with month name
+      return date.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
   }
   
   return value.toString();
