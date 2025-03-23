@@ -68,13 +68,10 @@ describe('FormGroup', () => {
     );
     
     fireEvent.change(screen.getByLabelText('First Name'), {
-      target: { value: 'Jane' }
+      target: { value: 'Jane X' }
     });
     
-    expect(handleChange).toHaveBeenCalledWith('contactInfo', {
-      firstName: 'Jane',
-      lastName: 'Doe'
-    });
+    expect(handleChange).toHaveBeenCalledWith("contactInfo.firstName", "Jane X");
   });
   
   test('displays field errors correctly', () => {
