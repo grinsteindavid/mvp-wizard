@@ -393,6 +393,13 @@ export const ArrayItemContainer = styled.div`
   position: relative;
   box-shadow: 0 2px 4px rgba(0,0,0,0.04);
   transition: all 0.2s ease;
+  overflow: hidden; /* Prevent content from spilling outside */
+  
+  /* Constrain the width of inputs inside ArrayItemContainer */
+  input, select, textarea {
+    max-width: calc(100% - 10px);
+    box-sizing: border-box;
+  }
   
   &:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,0.08);
@@ -411,11 +418,12 @@ export const ArrayItemContainer = styled.div`
 export const ArrayItemActions = styled.div`
   position: absolute;
   top: 8px;
-  right: 8px;
+  right: 40px; /* Increased from 8px to leave room for render counter */
   display: flex;
   gap: 8px;
   transition: opacity 0.2s ease;
   opacity: 0.7;
+  z-index: 20; /* Ensure it's above other elements */
   
   ${ArrayItemContainer}:hover & {
     opacity: 1;
