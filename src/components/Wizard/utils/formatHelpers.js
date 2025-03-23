@@ -11,20 +11,38 @@ export const transformFieldsForValidation = (fields) => {
   const transformedData = {};
 
   Object.keys(fields).forEach(fieldName => {
-    // Make sure the field and its value exist
+    // Make sure the field exists
     const field = fields[fieldName];
-    if (field && field.hasOwnProperty('value')) {
+    if (!field) return;
+
+    // Handle different field types
+    if (field.type === 'group' && field.fields) {
+      // For group fields, recursively transform the nested fields
+      const nestedData = transformFieldsForValidation(field.fields);
+      if (Object.keys(nestedData).length > 0) {
+        transformedData[fieldName] = nestedData;
+      }
+    } else if (field.type === 'array' && field.fields && Array.isArray(field.value)) {
+      // For array fields with nested structure, transform each item
+      transformedData[fieldName] = field.value.map(item => {
+        const itemData = {};
+        // Transform each field within the array item
+        Object.keys(field.fields).forEach(nestedFieldName => {
+          if (item && item[nestedFieldName] !== undefined) {
+            itemData[nestedFieldName] = item[nestedFieldName];
+          }
+        });
+        return itemData;
+      });
+    } else if (field.hasOwnProperty('value')) {
       const { value, type } = field;
 
-      // Transform based on field type, not field name
-      if (type === 'array' && Array.isArray(value)) {
-        // Array fields - keep the array structure
-        transformedData[fieldName] = value;
-      } else if (type === 'number' && value !== undefined) {
+      // Transform based on field type
+      if (type === 'number' && value !== undefined) {
         // Number fields - ensure they're converted to numbers
         transformedData[fieldName] = Number(value);
-      } else if (type === 'multiselect' && Array.isArray(value)) {
-        // Multiselect fields - keep the array of selections
+      } else if ((type === 'multiselect' || type === 'checkboxes') && Array.isArray(value)) {
+        // Multiselect/checkboxes fields - keep the array of selections
         transformedData[fieldName] = value;
       } else if (type === 'boolean' && value !== undefined) {
         // Boolean fields - ensure they're boolean type
