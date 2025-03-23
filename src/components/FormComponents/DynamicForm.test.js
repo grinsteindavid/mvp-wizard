@@ -110,20 +110,10 @@ describe('DynamicForm', () => {
     );
     
     fireEvent.change(screen.getByLabelText('Name'), {
-      target: { value: 'Jane Doe' }
+      target: { value: 'Jane Doe2' }
     });
     
-    // Extract the callback function that was passed to handleChange
-    const callback = handleChange.mock.calls[0][0];
-    
-    // Execute the callback with the current values to get the actual result
-    const result = callback(mockValues);
-    
-    // Verify the result matches our expectations
-    expect(result).toEqual({
-      ...mockValues,
-      name: 'Jane Doe'
-    });
+    expect(handleChange).toHaveBeenCalledWith("name", "Jane Doe2");
   });
   
   test('displays error messages correctly', () => {
