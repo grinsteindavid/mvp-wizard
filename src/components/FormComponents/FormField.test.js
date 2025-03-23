@@ -71,7 +71,11 @@ describe('FormField', () => {
       />
     );
     
-    expect(screen.getByText('Unsupported field type: unsupported')).toBeInTheDocument();
+    // Add a more specific selector with a test ID
+    const errorContainer = screen.getByTestId('unsupported-field-error');
+    expect(errorContainer).toBeInTheDocument();
+    expect(errorContainer.textContent).toContain('Unsupported field type:');
+    expect(errorContainer.textContent).toContain('unsupported');
   });
   
   test('does not re-render when props have not changed', () => {
@@ -254,7 +258,11 @@ describe('FormField', () => {
     // Since we changed to an unsupported type, the original component shouldn't be called again
     expect(fieldTypeMap.text).toHaveBeenCalledTimes(1);
     // Instead, we should see the error message for unsupported type
-    expect(screen.getByText('Unsupported field type: unsupported')).toBeInTheDocument();
+    // Add a more specific selector with a test ID
+    const errorContainer = screen.getByTestId('unsupported-field-error');
+    expect(errorContainer).toBeInTheDocument();
+    expect(errorContainer.textContent).toContain('Unsupported field type:');
+    expect(errorContainer.textContent).toContain('unsupported');
   });
   
   test('does not re-render when onChange function changes', () => {

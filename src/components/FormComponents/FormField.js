@@ -80,7 +80,10 @@ const FormField = ({
   if (!FieldComponent) {
     return (
       <EnhancedFieldContainer hasError={true}>
-        <div style={{ padding: '12px', backgroundColor: '#ffebee', borderRadius: '6px', color: '#c62828' }}>
+        <div
+          data-testid="unsupported-field-error"
+          style={{ padding: '12px', backgroundColor: '#ffebee', borderRadius: '6px', color: '#c62828' }}
+        >
           Unsupported field type: <strong>{field.type}</strong>
         </div>
       </EnhancedFieldContainer>

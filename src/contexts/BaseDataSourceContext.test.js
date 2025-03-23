@@ -145,44 +145,21 @@ describe('BaseDataSourceContext', () => {
   });
 
   test('updateField updates a field value', () => {
-    // Mock the updateField function for testing
-    const mockUpdateField = jest.fn();
-    
-    // Create a custom wrapper that mocks the updateField function
-    const CustomTestComponent = () => {
-      const contextValue = useTestContext();
-      // Override the updateField function with our mock
-      const customContextValue = {
-        ...contextValue,
-        updateField: mockUpdateField
-      };
-      
-      return (
-        <div>
-          <div data-testid="test-field">{mockUpdateField.mock.calls.length > 0 ? 'updated value' : 'initial value'}</div>
-          <button 
-            data-testid="update-field" 
-            onClick={() => customContextValue.updateField('testField', 'updated value')}
-          >
-            Update Field
-          </button>
-        </div>
-      );
-    };
-
     render(
       <TestProvider>
-        <CustomTestComponent />
+        <TestComponent />
       </TestProvider>
     );
 
+    // Get the initial value
+    expect(screen.getByTestId('test-field').textContent).toBe('initial value');
+    
+    // Click the button to update the field
     act(() => {
       screen.getByTestId('update-field').click();
     });
 
-    // Verify the mock was called with the right parameters
-    expect(mockUpdateField).toHaveBeenCalledWith('testField', 'updated value');
-    // And that the DOM was updated
+    // Verify the field value was updated
     expect(screen.getByTestId('test-field')).toHaveTextContent('updated value');
   });
 
@@ -273,17 +250,35 @@ describe('BaseDataSourceContext', () => {
   });
 
   test('custom reducer action works', () => {
+    // Create a test component that displays the value directly
+    const CustomTestComponent = () => {
+      const { state, dispatch } = useTestContext();
+      return (
+        <div>
+          <div data-testid="custom-field">{state.testField}</div>
+          <button
+            data-testid="custom-action"
+            onClick={() => dispatch({ type: 'TEST_ACTION', payload: 'custom value' })}
+          >
+            Custom Action
+          </button>
+        </div>
+      );
+    };
+
     render(
       <TestProvider>
-        <TestComponent />
+        <CustomTestComponent />
       </TestProvider>
     );
 
+    // Simulate clicking the custom action button
     act(() => {
       screen.getByTestId('custom-action').click();
     });
 
-    expect(screen.getByTestId('test-field').textContent).toBe('custom value');
+    // Verify the custom action updated the state
+    expect(screen.getByTestId('custom-field').textContent).toBe('custom value');
   });
 
   test('baseActions exports the correct action types', () => {
