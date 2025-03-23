@@ -10,15 +10,14 @@ import {
   ErrorMessage 
 } from './styled/FormElements';
 
-
 /**
  * ArrayField component for handling arrays of form fields.
  * Allows adding, removing, and editing items in the array.
- * Updated to work with field values and loading states stored within field definitions.
+ * Completely refactored to ensure proper state management for array operations.
  */
 const ArrayField = ({ field, onChange, errors }) => {
-  // Get the array value from the field definition
-  const value = field.value || [];
+  // Ensure we always have a valid array value
+  const arrayValue = Array.isArray(field.value) ? field.value : [];
   
   // Create a new empty item based on the field configuration
   const createEmptyItem = () => {
@@ -31,25 +30,42 @@ const ArrayField = ({ field, onChange, errors }) => {
 
   // Add a new item to the array
   const handleAddItem = () => {
-    // For array operations, we still need to pass the entire array
-    // We'll handle this special case in the parent component
-    const newItems = [...value, createEmptyItem()];
+    // Create a deep copy of the current array to avoid reference issues
+    const currentItems = JSON.parse(JSON.stringify(arrayValue));
+    const newItems = [...currentItems, createEmptyItem()];
+    
+    // Update the entire array at once
     onChange(field.name, newItems);
   };
 
   // Remove an item from the array
   const handleRemoveItem = (index) => {
-    // For array operations, we still need to pass the entire array
-    // We'll handle this special case in the parent component
-    const newItems = [...value];
-    newItems.splice(index, 1);
-    onChange(field.name, newItems);
+    // Create a deep copy of the current array to avoid reference issues
+    const currentItems = JSON.parse(JSON.stringify(arrayValue));
+    
+    // Remove the item at the specified index
+    if (index >= 0 && index < currentItems.length) {
+      currentItems.splice(index, 1);
+      onChange(field.name, currentItems);
+    }
   };
 
   // Update a field within an item
   const handleItemFieldChange = (index, fieldName, fieldValue) => {
-    // Pass the fully qualified field path to the parent
-    onChange(`${field.name}[${index}].${fieldName}`, fieldValue);
+    // Create a deep copy of the current array to avoid reference issues
+    const currentItems = JSON.parse(JSON.stringify(arrayValue));
+    
+    // Ensure the item exists at this index
+    if (index >= 0 && index < currentItems.length) {
+      // Update the specific field while preserving other fields
+      currentItems[index] = {
+        ...currentItems[index],
+        [fieldName]: fieldValue
+      };
+      
+      // Update the entire array at once
+      onChange(field.name, currentItems);
+    }
   };
 
   // Get array-level error if any
@@ -59,8 +75,8 @@ const ArrayField = ({ field, onChange, errors }) => {
     <ArrayContainer>
       <ArrayTitle>{field.label}</ArrayTitle>
       
-      {value.map((item, index) => (
-        <ArrayItemContainer key={index}>
+      {arrayValue.map((item, index) => (
+        <ArrayItemContainer key={`${field.name}-item-${index}`}>
           <ArrayItemActions>
             <ActionButton danger onClick={() => handleRemoveItem(index)}>×</ActionButton>
           </ArrayItemActions>
@@ -70,7 +86,7 @@ const ArrayField = ({ field, onChange, errors }) => {
             const formField = {
               ...fieldConfig,
               name: fieldName,
-              value: item[fieldName] // Set the value from the array item
+              value: item[fieldName] || '' // Ensure we always have a value, even if it's empty
             };
             
             // Get any error for this specific field in this specific item
@@ -78,9 +94,9 @@ const ArrayField = ({ field, onChange, errors }) => {
             
             return (
               <FormField
-                key={fieldName}
+                key={`${field.name}-${index}-${fieldName}`}
                 field={formField}
-                value={item[fieldName]}
+                value={item[fieldName] || ''}
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
                 loading={fieldConfig.loading}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import DynamicForm from './DynamicForm';
+import Joi from 'joi';
 
 describe('DynamicForm', () => {
   const mockFields = {
@@ -146,5 +147,52 @@ describe('DynamicForm', () => {
     );
     
     expect(screen.getByText('No form fields available')).toBeInTheDocument();
+  });
+  
+  test('validates fields using validationSchema', () => {
+    // Create a mock validation schema using Joi
+    const mockValidationSchema = Joi.object({
+      name: Joi.string().min(3).required(),
+      email: Joi.string().email().required()
+    });
+    
+    const mockOnValidate = jest.fn();
+    
+    const fieldsWithValidation = {
+      name: {
+        type: 'text',
+        label: 'Name',
+        value: 'Jo',
+        fieldPath: 'name'
+      },
+      email: {
+        type: 'email',
+        label: 'Email',
+        value: 'invalid-email',
+        fieldPath: 'email'
+      }
+    };
+    
+    render(
+      <DynamicForm 
+        fields={fieldsWithValidation} 
+        onChange={() => {}} 
+        errors={{}} 
+        onValidate={mockOnValidate}
+        validationSchema={mockValidationSchema}
+      />
+    );
+    
+    // Trigger validation by blurring the name field
+    fireEvent.blur(screen.getByLabelText('Name'));
+    
+    // Check if onValidate was called with validation results
+    expect(mockOnValidate).toHaveBeenCalledWith(
+      'name', 
+      expect.objectContaining({
+        isValid: false,
+        error: expect.any(String)
+      })
+    );
   });
 });

@@ -52,26 +52,22 @@ export const validateProject = (dataSource, projectData) => {
 
 /**
  * Validate a specific field
- * @param {string} dataSource - The data source identifier
+ * @param {Object} schema - The validation schema object
  * @param {string} fieldName - The name of the field to validate (can be dot notation for nested fields)
  * @param {any} value - The value to validate
- * @param {Object} formData - Optional complete form data for context-dependent validation
  * @returns {Object} - Validation result with isValid flag and error message
  */
-export const validateField = (dataSource, fieldName, value, formData = {}) => {
-  const createSchema = schemaCreators[dataSource];
-  
-  if (!createSchema) {
+export const validateField = (schema, fieldName, value) => {
+  if (!schema || typeof schema !== 'object') {
     return {
       isValid: false,
-      error: 'Invalid data source'
+      error: 'Invalid schema'
     };
   }
+  
+  const fullSchema = schema;
 
   try {
-    // Create the full schema
-    const fullSchema = createSchema();
-    
     // Try to extract the field schema (handles both top-level and nested fields)
     const fieldSchema = fullSchema.extract(fieldName) || extractNestedSchema(fullSchema, fieldName);
     

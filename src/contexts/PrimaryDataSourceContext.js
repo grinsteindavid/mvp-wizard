@@ -1,7 +1,6 @@
 import React, { createContext, useReducer, useEffect } from 'react';
 import { createDataSourceBuilders, createUseDataSource, baseActions } from './BaseDataSourceContext';
 import { primaryDataService } from '../services/http';
-import { validateField } from '../services/validationService';
 
 // Create the context
 const PrimaryDataSourceContext = createContext();
@@ -13,15 +12,13 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('primary', 'projectName', value, formData)
+      value: ''
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('primary', 'dailyBudget', value, formData)
+      value: ''
     },
     bidStrategy: {
       label: 'Bid Strategy',
@@ -29,16 +26,14 @@ const initialState = {
       required: true,
       value: '',
       loading: false, // Initialize loading state
-      options: [], // Will be populated via dispatch when strategies are loaded
-      validateField: (value, formData) => validateField('primary', 'bidStrategy', value, formData)
+      options: [] // Will be populated via dispatch when strategies are loaded
     },
     keywords: {
       label: 'Keywords',
       type: 'textarea',
       required: true,
       value: '',
-      placeholder: 'Enter keywords separated by commas',
-      validateField: (value, formData) => validateField('primary', 'keywords', value, formData)
+      placeholder: 'Enter keywords separated by commas'
     },
     categoryGroups: {
       label: 'Category Groups',
@@ -46,19 +41,16 @@ const initialState = {
       required: true,
       value: [],
       loading: false, // Initialize loading state
-      validateField: (value, formData) => validateField('primary', 'categoryGroups', value, formData),
       fields: {
         name: {
           label: 'Group Name',
           type: 'text',
-          required: true,
-          validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.name`, value, formData)
+          required: true
         },
         cpc: {
           label: 'Max CPC',
           type: 'number',
-          required: true,
-          validateField: (value, formData, index) => validateField('primary', `categoryGroups.${index}.cpc`, value, formData)
+          required: true
         }
       }
     }

@@ -3,15 +3,17 @@ import FormField from './FormField';
 import FormGroup from './FormGroup';
 import ArrayField from './ArrayField';
 import { FormContainer } from './styled/FormElements';
+import { validateField } from '../../services/validationService';
 
 /**
  * DynamicForm component that renders a form based on a configuration object.
  * Supports different field types including groups and arrays.
- * Now with field-level validation using the validateField function from field definitions.
+ * Now with field-level validation using the validateField function from validationService.
  * Also supports loading state from field definitions.
  * Updated to work with field values and loading states stored within field definitions.
+ * Accepts a validationSchema prop for centralized validation.
  */
-const DynamicForm = ({ fields, onChange, errors, onValidate }) => {
+const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema }) => {
   // Local state for field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
   
@@ -22,14 +24,14 @@ const DynamicForm = ({ fields, onChange, errors, onValidate }) => {
   const validateSingleField = (name, value) => {
     const field = fields[name];
     
-    // Skip validation if the field doesn't have a validateField function
-    if (!field || !field.validateField) return;
+    // Skip validation if no field or no validation schema
+    if (!field || !validationSchema) return;
     
     // Create a formData object from field values for validation context
     const formData = createFormDataFromFields(fields);
     
-    // Call the field's validateField function
-    const validationResult = field.validateField(value, formData);
+    // Call the validateField function from validationService
+    const validationResult = validateField(validationSchema, name, value, formData);
     
     // Update the local field errors
     setFieldErrors(prev => ({
@@ -95,7 +97,7 @@ const DynamicForm = ({ fields, onChange, errors, onValidate }) => {
         
         // Handle blur event for validation
         const handleBlur = () => {
-          if (field.validateField) {
+          if (validationSchema) {
             validateSingleField(fieldName, field.value);
           }
         };

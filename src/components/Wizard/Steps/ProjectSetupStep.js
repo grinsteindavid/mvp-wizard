@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useWizard } from '../../../contexts/WizardContext';
 import { dataSourceNames } from '../../../contexts/DataSourceFactory';
 import DynamicForm from '../../FormComponents/DynamicForm';
+import { schemaCreators } from '../../../schemas';
 import {
   StepContainer,
   Title,
@@ -21,6 +22,12 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
   
   // Verify that we have the expected data source
   const isContextValid = !!currentSource && typeof currentSource === 'object';
+  
+  // Create the validation schema for the current data source
+  const validationSchema = useMemo(() => {
+    if (!dataSource || !schemaCreators[dataSource]) return null;
+    return schemaCreators[dataSource]();
+  }, [dataSource]);
 
 
   /**
@@ -59,7 +66,7 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
         values={currentSource.state || {}}
         onChange={handleFormChange}
         errors={currentSource.state?.errors || {}}
-        loadingFields={currentSource.state?.loadingFields || {}}
+        validationSchema={validationSchema}
       />
       
       <ButtonContainer>

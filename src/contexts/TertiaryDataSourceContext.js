@@ -1,7 +1,6 @@
 import { createContext, useReducer, useEffect } from 'react';
 import { createDataSourceBuilders, createUseDataSource, baseActions } from './BaseDataSourceContext';
 import tertiaryDataService from '../services/http/tertiaryDataService';
-import { validateField } from '../services/validationService';
 
 // Create the context
 const TertiaryDataSourceContext = createContext();
@@ -13,8 +12,7 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('tertiary', 'projectName', value, formData)
+      value: ''
     },
     projectObjective: {
       label: 'Project Objective',
@@ -22,34 +20,29 @@ const initialState = {
       required: true,
       value: '',
       loading: false, // Initialize loading state
-      options: [],
-      validateField: (value, formData) => validateField('tertiary', 'projectObjective', value, formData)
+      options: []
     },
     startDate: {
       label: 'Start Date',
       type: 'date',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('tertiary', 'startDate', value, formData)
+      value: ''
     },
     endDate: {
       label: 'End Date',
       type: 'date',
       required: false,
-      value: '',
-      validateField: (value, formData) => validateField('tertiary', 'endDate', value, formData)
+      value: ''
     },
     budget: {
       label: 'Budget',
       type: 'group',
-      validateField: (value, formData) => validateField('tertiary', 'budget', value, formData),
       fields: {
         amount: {
           label: 'Amount',
           type: 'number',
           required: true,
-          value: '',
-          validateField: (value, formData) => validateField('tertiary', 'budget.amount', value, formData)
+          value: ''
         },
         type: {
           label: 'Budget Type',
@@ -59,15 +52,13 @@ const initialState = {
           options: [
             { value: 'daily', label: 'Daily Budget' },
             { value: 'lifetime', label: 'Lifetime Budget' }
-          ],
-          validateField: (value, formData) => validateField('tertiary', 'budget.type', value, formData)
+          ]
         }
       }
     },
     bidding: {
       label: 'Bidding',
       type: 'group',
-      validateField: (value, formData) => validateField('tertiary', 'bidding', value, formData),
       fields: {
         strategy: {
           label: 'Bidding Strategy',
@@ -75,16 +66,14 @@ const initialState = {
           options: [],
           required: true,
           value: '',
-          loading: false, // Initialize loading state
-          validateField: (value, formData) => validateField('tertiary', 'bidding.strategy', value, formData)
+          loading: false // Initialize loading state
         },
         amount: {
           label: 'Bid Amount',
           type: 'number',
           required: false,
           value: '',
-          dependsOn: { field: 'strategy', value: 'manual' },
-          validateField: (value, formData) => validateField('tertiary', 'bidding.amount', value, formData)
+          dependsOn: { field: 'strategy', value: 'manual' }
         }
       }
     }

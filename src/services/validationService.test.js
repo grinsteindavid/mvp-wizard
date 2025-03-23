@@ -83,7 +83,7 @@ describe('validationService', () => {
       mockSchema.extract.mockReturnValue(mockFieldSchema);
       
       // Execute
-      const result = validateField('google', 'projectName', 'Test Project');
+      const result = validateField(mockSchema, 'projectName', 'Test Project');
       
       // Verify
       expect(result).toEqual({
@@ -102,7 +102,7 @@ describe('validationService', () => {
       mockSchema.extract.mockReturnValue(mockFieldSchema);
       
       // Execute
-      const result = validateField('google', 'projectName', '');
+      const result = validateField(mockSchema, 'projectName', '');
       
       // Verify
       expect(result).toEqual({
@@ -111,14 +111,14 @@ describe('validationService', () => {
       });
     });
     
-    test('should return isValid false when data source is invalid', () => {
+    test('should return isValid false when schema is invalid', () => {
       // Execute
-      const result = validateField('invalid', 'projectName', 'Test Project');
+      const result = validateField(null, 'projectName', 'Test Project');
       
       // Verify
       expect(result).toEqual({
         isValid: false,
-        error: 'Invalid data source'
+        error: 'Invalid schema'
       });
     });
   });

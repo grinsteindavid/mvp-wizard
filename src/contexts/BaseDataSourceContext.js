@@ -4,7 +4,6 @@ import { set } from 'lodash';
 
 // Base initial state for all data sources
 const baseInitialState = {
-  projectTitle: '',
   isValid: false,
   errors: {},
   isSubmitting: false,

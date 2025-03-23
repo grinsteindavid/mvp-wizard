@@ -1,7 +1,6 @@
 import { createContext, useReducer, useEffect } from 'react';
 import { createDataSourceBuilders, createUseDataSource, baseActions } from './BaseDataSourceContext';
 import secondaryDataService from '../services/http/secondaryDataService';
-import { validateField } from '../services/validationService';
 
 // Create the context
 const SecondaryDataSourceContext = createContext();
@@ -13,34 +12,29 @@ const initialState = {
       label: 'Project Name',
       type: 'text',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('secondary', 'projectName', value, formData)
+      value: ''
     },
     targetUrl: {
       label: 'Target URL',
       type: 'url',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('secondary', 'targetUrl', value, formData)
+      value: ''
     },
     bidAmount: {
       label: 'Bid Amount',
       type: 'number',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('secondary', 'bidAmount', value, formData)
+      value: ''
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
-      value: '',
-      validateField: (value, formData) => validateField('secondary', 'dailyBudget', value, formData)
+      value: ''
     },
     targeting: {
       label: 'Targeting',
       type: 'group',
-      validateField: (value, formData) => validateField('secondary', 'targeting', value, formData),
       fields: {
         countries: {
           label: 'Countries',
@@ -48,8 +42,7 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false, // Initialize loading state
-          validateField: (value, formData) => validateField('secondary', 'targeting.countries', value, formData)
+          loading: false // Initialize loading state
         },
         devices: {
           label: 'Devices',
@@ -57,8 +50,7 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false, // Initialize loading state
-          validateField: (value, formData) => validateField('secondary', 'targeting.devices', value, formData)
+          loading: false // Initialize loading state
         }
       }
     }
