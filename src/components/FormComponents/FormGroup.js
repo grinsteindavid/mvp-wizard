@@ -42,7 +42,7 @@ const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
             value={fieldValue}
             onChange={handleFieldChange}
             error={fieldError}
-            loading={loadingFields && get(loadingFields, fieldName)}
+            loading={get(loadingFields, fieldName)}
           />
         );
       })}

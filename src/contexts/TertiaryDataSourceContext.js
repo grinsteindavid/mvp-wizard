@@ -22,7 +22,6 @@ const initialState = {
   },
   // Available options for selection - not part of schema validation
   availableObjectives: [],
-  availableBudgetTypes: [],
   availableBiddingStrategies: [],
   fields: {
     projectName: {
@@ -155,6 +154,7 @@ const builders = createDataSourceBuilders(initialState, tertiaryReducer);
 export const TertiaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
   const baseContextValue = builders.createContextValue(state, dispatch);
+  const { setFieldLoading, updateFieldOptions } = baseContextValue;
   
   // Tertiary-specific actions
   const updateBudget = (field, value) => {
@@ -182,27 +182,27 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     const loadData = async () => {
       try {
         // Set loading state for fields
-        baseContextValue.setFieldLoading('projectObjective', true);
-        baseContextValue.setFieldLoading('bidding.strategy', true);
+        setFieldLoading('projectObjective', true);
+        setFieldLoading('bidding.strategy', true);
         
         // Load objectives
         const {data: objectives} = await tertiaryDataService.getObjectives();
         setObjectives(objectives);
-        baseContextValue.updateFieldOptions('projectObjective', objectives);
+        updateFieldOptions('projectObjective', objectives);
         
         // Load bidding strategies
         const {data: strategies} = await tertiaryDataService.getBiddingStrategies();
         setBiddingStrategies(strategies);
-        baseContextValue.updateFieldOptions('bidding.strategy', strategies);
+        updateFieldOptions('bidding.strategy', strategies);
         
         // Clear loading states
-        baseContextValue.setFieldLoading('projectObjective', false);
-        baseContextValue.setFieldLoading('bidding.strategy', false);
+        setFieldLoading('projectObjective', false);
+        setFieldLoading('bidding.strategy', false);
       } catch (error) {
         console.error('Error loading data from services:', error);
         // Clear loading states on error
-        baseContextValue.setFieldLoading('projectObjective', false);
-        baseContextValue.setFieldLoading('bidding.strategy', false);
+        setFieldLoading('projectObjective', false);
+        setFieldLoading('bidding.strategy', false);
       }
     };
 
@@ -218,7 +218,7 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     setObjectives,
     setBudgetTypes,
     setBiddingStrategies,
-    fields: state.fields || builders.fields,
+    // No need to add fields again as it's already included in baseContextValue.state
   };
   
   return (

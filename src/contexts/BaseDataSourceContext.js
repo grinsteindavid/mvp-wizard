@@ -1,3 +1,4 @@
+import produce from 'immer';
 import React, { createContext, useContext, useReducer } from 'react';
 import { set } from 'lodash';
 
@@ -26,34 +27,48 @@ const baseReducerActions = {
 const baseReducer = (state, action) => {
   switch (action.type) {
     case baseReducerActions.UPDATE_FIELD:
-      return set({...state}, action.field, action.value);
+      return produce(state, draft => {
+        set(draft, action.field, action.value);
+      });
     case baseReducerActions.SET_VALIDATION_RESULT:
-      return {
-        ...state,
-        isValid: action.payload.isValid,
-        errors: action.payload.errors || {}
-      };
+      return produce(state, draft => {
+        draft.isValid = action.payload.isValid;
+        draft.errors = action.payload.errors || {};
+      });
     case baseReducerActions.SET_SUBMITTING:
-      return {
-        ...state,
-        isSubmitting: action.payload
-      };
+      return produce(state, draft => {
+        draft.isSubmitting = action.payload;
+      });
     case baseReducerActions.SET_SUBMITTED:
-      return {
-        ...state,
-        isSubmitted: action.payload
-      };
+      return produce(state, draft => {
+        draft.isSubmitted = action.payload;
+      });
     case baseReducerActions.SET_FIELD_LOADING:
-      console.log('Setting field loading state:', action.field, action.isLoading);
-      return set(
-        {...state},
-        'loadingFields.' + action.field,
-        action.isLoading
-      );
+      return produce(state, draft => {
+        set(draft.loadingFields, action.field, action.isLoading);
+      });
     case baseReducerActions.UPDATE_FIELD_OPTIONS:
-      // For nested fields like 'bidding.strategy'
-      const fieldPath = `fields.${action.fieldName}.options`;
-      return set({...state}, fieldPath, action.options);
+      return produce(state, draft => {
+        // Handle nested fields like 'targeting.fields.countries.options'
+        // or simple fields like 'bidding.options'
+        const parts = action.fieldName.split('.');
+        let fieldPath;
+        
+        if (parts.length > 1) {
+          // For nested fields, construct the path correctly
+          // Format: fields.groupName.fields.fieldName.options
+          const nestedPath = parts.reduce((path, part, index) => {
+            // Add 'fields.' before each part except the first one
+            return path + part + (index < parts.length - 1 ? '.fields.' : '');
+          }, 'fields.');
+          fieldPath = nestedPath + '.options';
+        } else {
+          // For top-level fields, use the simple path
+          fieldPath = `fields.${action.fieldName}.options`;
+        }
+        
+        set(draft, fieldPath, action.options);
+      });
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
     default:

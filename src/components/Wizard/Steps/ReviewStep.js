@@ -71,7 +71,7 @@ const ReviewStep = ({ dataSourceContext }) => {
   // Memoize the field values rendering for better performance
   const preparedFields = useMemo(() => {
     // Safe check for currentSource and its fields
-    const fields = currentSource?.fields || {};
+    const fields = currentSource?.state.fields || {};
     const projectData = currentSource?.state || {};
     
     return Object.keys(fields).map(fieldName => {

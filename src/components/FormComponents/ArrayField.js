@@ -81,7 +81,7 @@ const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
                 value={fieldValue}
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
-                loading={loadingFields && get(loadingFields, fieldName)}
+                loading={get(loadingFields, fieldName)}
               />
             );
           })}

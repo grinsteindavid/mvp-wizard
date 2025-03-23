@@ -119,6 +119,7 @@ const builders = createDataSourceBuilders(initialState, primaryReducer);
 export const PrimaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
   const baseContextValue = builders.createContextValue(state, dispatch);
+  const { setFieldLoading, updateFieldOptions } = baseContextValue;
   
   // Primary-specific actions - wrapped in useCallback to prevent unnecessary re-renders
   const addCategoryGroup = useCallback(() => {
@@ -132,6 +133,10 @@ export const PrimaryDataSourceProvider = ({ children }) => {
   const updateCategoryGroup = useCallback((index, field, value) => {
     dispatch({ type: primaryActions.UPDATE_CATEGORY_GROUP, index, field, value });
   }, [dispatch]);
+
+  const setBidStrategy = useCallback((value) => {
+    dispatch({ type: primaryActions.SET_BID_STRATEGIES, payload: value });
+  }, [dispatch]);
   
 
   // Custom side effect - Load data from services on mount
@@ -139,20 +144,20 @@ export const PrimaryDataSourceProvider = ({ children }) => {
     const loadData = async () => {
       try {
         // Set loading state for bidStrategy field
-        baseContextValue.setFieldLoading('bidStrategy', true);
+        setFieldLoading('bidStrategy', true);
         
         // Load bid strategies
         const {data: strategies} = await primaryDataService.getOptimizationStrategies();
         // Dispatch action to set bid strategies
-        dispatch({ type: primaryActions.SET_BID_STRATEGIES, payload: strategies});
-        baseContextValue.updateFieldOptions('bidStrategy', strategies);
+        setBidStrategy(strategies);
+        updateFieldOptions('bidStrategy', strategies);
         
         // Clear loading state for bidStrategy field
-        baseContextValue.setFieldLoading('bidStrategy', false);
+        setFieldLoading('bidStrategy', false);
       } catch (error) {
         console.error('Error loading data from services:', error);
         // Clear loading state on error too
-        baseContextValue.setFieldLoading('bidStrategy', false);
+        setFieldLoading('bidStrategy', false);
       }
     };
     
@@ -162,11 +167,11 @@ export const PrimaryDataSourceProvider = ({ children }) => {
   // Create the context value with base actions and primary-specific actions
   const contextValue = {
     ...baseContextValue,
-    addCategoryGroup,
     removeCategoryGroup,
     updateCategoryGroup,
-    // Use fields from the state if available, otherwise use the builders fields
-    fields: state.fields || builders.fields
+    setBidStrategy,
+    addCategoryGroup
+    // No need to add fields again as it's already included in baseContextValue.state
   };
   
   return (
