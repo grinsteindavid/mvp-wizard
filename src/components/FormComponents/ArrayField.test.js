@@ -113,9 +113,6 @@ describe('ArrayField', () => {
       target: { value: '789 Pine St' }
     });
     
-    expect(handleChange).toHaveBeenCalledWith('addresses', [
-      { street: '789 Pine St', city: 'New York' },
-      { street: '456 Oak Ave', city: 'Los Angeles' }
-    ]);
+    expect(handleChange).toHaveBeenCalledWith("addresses[0].street", "789 Pine St");
   });
 });

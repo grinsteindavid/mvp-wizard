@@ -113,6 +113,7 @@
 - Create test utilities for common testing patterns
 - Implement E2E tests with playwright for critical paths
 - SWC/JEST can have conflicts with spyOn
+- Add data-testid attributes to components for reliable test selection
 
 ## Build & Deployment
 - Optimize bundle size with code splitting
