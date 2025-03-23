@@ -43,11 +43,8 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
   };
 
   const handleFieldChange = (name, value) => {
-    // Update the form values
-    onChange(prevValues => ({
-      ...prevValues,
-      [name]: value
-    }));
+    // Update the form values by directly passing field name and value
+    onChange(name, value);
     
     // Validate the field after a short delay to allow for typing
     setTimeout(() => {

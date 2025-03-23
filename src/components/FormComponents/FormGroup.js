@@ -9,14 +9,8 @@ import {get} from 'lodash';
  */
 const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
   const handleFieldChange = (fieldName, fieldValue) => {
-    // Update the nested field within the group
-    const updatedGroupValue = {
-      ...values,
-      [fieldName]: fieldValue
-    };
-    
-    // Pass the entire updated group value to the parent
-    onChange(field.name, updatedGroupValue);
+    // Pass the fully qualified field name to the parent
+    onChange(`${field.name}.${fieldName}`, fieldValue);
   };
 
   return (

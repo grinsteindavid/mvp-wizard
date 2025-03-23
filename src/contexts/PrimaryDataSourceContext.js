@@ -1,4 +1,4 @@
-import React, { createContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useReducer, useEffect } from 'react';
 import { createDataSourceBuilders, createUseDataSource, baseActions } from './BaseDataSourceContext';
 import { primaryDataService } from '../services/http';
 import { validateField } from '../services/validationService';
@@ -13,9 +13,6 @@ const initialState = {
   bidStrategy: '',
   keywords: '',
   categoryGroups: [],
-  // Available options for selection - not part of schema validation
-  availableBidStrategies: [],
-  // Store field definitions with their options in state
   fields: {
     projectName: {
       label: 'Project Name',
@@ -68,43 +65,12 @@ const initialState = {
 
 // Primary-specific reducer actions
 const primaryActions = {
-  ADD_CATEGORY_GROUP: 'ADD_CATEGORY_GROUP',
-  REMOVE_CATEGORY_GROUP: 'REMOVE_CATEGORY_GROUP',
-  UPDATE_CATEGORY_GROUP: 'UPDATE_CATEGORY_GROUP',
-  SET_BID_STRATEGIES: 'SET_BID_STRATEGIES',
-  UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS'
+ 
 };
 
 // Primary-specific reducer
 const primaryReducer = (state, action) => {
   switch (action.type) {
-    case primaryActions.ADD_CATEGORY_GROUP:
-      return {
-        ...state,
-        categoryGroups: [...state.categoryGroups, { name: '', cpc: '' }]
-      };
-    case primaryActions.REMOVE_CATEGORY_GROUP:
-      return {
-        ...state,
-        categoryGroups: state.categoryGroups.filter((_, index) => index !== action.index)
-      };
-    case primaryActions.UPDATE_CATEGORY_GROUP:
-      const updatedCategoryGroups = [...state.categoryGroups];
-      updatedCategoryGroups[action.index] = {
-        ...updatedCategoryGroups[action.index],
-        [action.field]: action.value
-      };
-      return {
-        ...state,
-        categoryGroups: updatedCategoryGroups
-      };
-
-    case primaryActions.SET_BID_STRATEGIES:
-      return {
-        ...state,
-        availableBidStrategies: action.payload
-      };
-      
     default:
       // Return the state unchanged to let the base reducer handle it
       return state;
@@ -120,23 +86,7 @@ export const PrimaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
   const baseContextValue = builders.createContextValue(state, dispatch);
   const { setFieldLoading, updateFieldOptions } = baseContextValue;
-  
-  // Primary-specific actions - wrapped in useCallback to prevent unnecessary re-renders
-  const addCategoryGroup = useCallback(() => {
-    dispatch({ type: primaryActions.ADD_CATEGORY_GROUP });
-  }, [dispatch]);
-  
-  const removeCategoryGroup = useCallback((index) => {
-    dispatch({ type: primaryActions.REMOVE_CATEGORY_GROUP, index });
-  }, [dispatch]);
-  
-  const updateCategoryGroup = useCallback((index, field, value) => {
-    dispatch({ type: primaryActions.UPDATE_CATEGORY_GROUP, index, field, value });
-  }, [dispatch]);
 
-  const setBidStrategy = useCallback((value) => {
-    dispatch({ type: primaryActions.SET_BID_STRATEGIES, payload: value });
-  }, [dispatch]);
   
 
   // Custom side effect - Load data from services on mount
@@ -149,7 +99,6 @@ export const PrimaryDataSourceProvider = ({ children }) => {
         // Load bid strategies
         const {data: strategies} = await primaryDataService.getOptimizationStrategies();
         // Dispatch action to set bid strategies
-        setBidStrategy(strategies);
         updateFieldOptions('bidStrategy', strategies);
         
         // Clear loading state for bidStrategy field
@@ -167,11 +116,6 @@ export const PrimaryDataSourceProvider = ({ children }) => {
   // Create the context value with base actions and primary-specific actions
   const contextValue = {
     ...baseContextValue,
-    removeCategoryGroup,
-    updateCategoryGroup,
-    setBidStrategy,
-    addCategoryGroup
-    // No need to add fields again as it's already included in baseContextValue.state
   };
   
   return (

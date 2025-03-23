@@ -16,9 +16,6 @@ const initialState = {
     countries: [],
     devices: []
   },
-  // Available options for selection - not part of schema validation
-  availableCountries: [],
-  availableDevices: [],
   fields: {
     projectName: {
       label: 'Project Name',
@@ -70,23 +67,13 @@ const initialState = {
 
 // Secondary-specific reducer actions
 const secondaryActions = {
-  SET_COUNTRIES: 'SET_COUNTRIES',
-  SET_DEVICES: 'SET_DEVICES'
+
 };
 
 // Secondary-specific reducer
 const secondaryReducer = (state, action) => {
   switch (action.type) {
-    case secondaryActions.SET_COUNTRIES:
-      return {
-        ...state,
-        availableCountries: action.payload
-      };
-    case secondaryActions.SET_DEVICES:
-      return {
-        ...state,
-        availableDevices: action.payload
-      };
+
     default:
       // Return the state unchanged to let the base reducer handle it
       return state;
@@ -103,15 +90,6 @@ export const SecondaryDataSourceProvider = ({ children }) => {
   const baseContextValue = builders.createContextValue(state, dispatch);
   const { setFieldLoading, updateFieldOptions } = baseContextValue;
   
-  // Secondary-specific actions
-  const setCountries = (countries) => {
-    dispatch({ type: secondaryActions.SET_COUNTRIES, payload: countries });
-  };
-  
-  const setDevices = (devices) => {
-    dispatch({ type: secondaryActions.SET_DEVICES, payload: devices });
-  };
-  
   // Custom side effect - Load data from services on mount
   useEffect(() => {
     const loadData = async () => {
@@ -120,15 +98,18 @@ export const SecondaryDataSourceProvider = ({ children }) => {
         setFieldLoading('targeting.countries', true);
         setFieldLoading('targeting.devices', true);
         
-        // Load countries for targeting
-        const {data: countries} = await secondaryDataService.getCountries();
-        setCountries(countries);
+        // Load all targeting data in parallel
+        const [
+          { data: countries },
+          { data: devices }
+        ] = await Promise.all([
+          secondaryDataService.getCountries(),
+          secondaryDataService.getDevices()
+        ]);
+
         updateFieldOptions('targeting.countries', countries);
         setFieldLoading('targeting.countries', false);
         
-        // Load devices for targeting
-        const {data: devices} = await secondaryDataService.getDevices();
-        setDevices(devices);
         updateFieldOptions('targeting.devices', devices);
         setFieldLoading('targeting.devices', false);
       } catch (error) {
@@ -145,9 +126,6 @@ export const SecondaryDataSourceProvider = ({ children }) => {
   // Create the context value with base actions and secondary-specific actions
   const contextValue = {
     ...baseContextValue,
-    setCountries,
-    setDevices,
-    // No need to add fields again as it's already included in baseContextValue.state
   };
   
   return (

@@ -20,9 +20,6 @@ const initialState = {
     strategy: '',
     amount: ''
   },
-  // Available options for selection - not part of schema validation
-  availableObjectives: [],
-  availableBiddingStrategies: [],
   fields: {
     projectName: {
       label: 'Project Name',
@@ -98,49 +95,11 @@ const initialState = {
 
 // Tertiary-specific reducer actions
 const tertiaryActions = {
-  UPDATE_BUDGET: 'UPDATE_BUDGET',
-  UPDATE_BIDDING: 'UPDATE_BIDDING',
-
-  SET_OBJECTIVES: 'SET_OBJECTIVES',
-  SET_BUDGET_TYPES: 'SET_BUDGET_TYPES',
-  SET_BIDDING_STRATEGIES: 'SET_BIDDING_STRATEGIES'
 };
 
 // Tertiary-specific reducer
 const tertiaryReducer = (state, action) => {
   switch (action.type) {
-    case tertiaryActions.UPDATE_BUDGET:
-      return {
-        ...state,
-        budget: {
-          ...state.budget,
-          [action.field]: action.value
-        }
-      };
-    case tertiaryActions.UPDATE_BIDDING:
-      return {
-        ...state,
-        bidding: {
-          ...state.bidding,
-          [action.field]: action.value
-        }
-      };
-
-    case tertiaryActions.SET_OBJECTIVES:
-      return {
-        ...state,
-        availableObjectives: action.payload
-      };
-    case tertiaryActions.SET_BUDGET_TYPES:
-      return {
-        ...state,
-        availableBudgetTypes: action.payload
-      };
-    case tertiaryActions.SET_BIDDING_STRATEGIES:
-      return {
-        ...state,
-        availableBiddingStrategies: action.payload
-      };
     default:
       // Return the state unchanged to let the base reducer handle it
       return state;
@@ -155,27 +114,7 @@ export const TertiaryDataSourceProvider = ({ children }) => {
   const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);
   const baseContextValue = builders.createContextValue(state, dispatch);
   const { setFieldLoading, updateFieldOptions } = baseContextValue;
-  
-  // Tertiary-specific actions
-  const updateBudget = (field, value) => {
-    dispatch({ type: tertiaryActions.UPDATE_BUDGET, field, value });
-  };
-  
-  const updateBidding = (field, value) => {
-    dispatch({ type: tertiaryActions.UPDATE_BIDDING, field, value });
-  };
-  
-  const setObjectives = (objectives) => {
-    dispatch({ type: tertiaryActions.SET_OBJECTIVES, payload: objectives });
-  };
-  
-  const setBudgetTypes = (types) => {
-    dispatch({ type: tertiaryActions.SET_BUDGET_TYPES, payload: types });
-  };
-  
-  const setBiddingStrategies = (strategies) => {
-    dispatch({ type: tertiaryActions.SET_BIDDING_STRATEGIES, payload: strategies });
-  };
+
   
   // Custom side effect - Load data from services on mount
   useEffect(() => {
@@ -185,14 +124,16 @@ export const TertiaryDataSourceProvider = ({ children }) => {
         setFieldLoading('projectObjective', true);
         setFieldLoading('bidding.strategy', true);
         
-        // Load objectives
-        const {data: objectives} = await tertiaryDataService.getObjectives();
-        setObjectives(objectives);
-        updateFieldOptions('projectObjective', objectives);
+        // Load objectives and bidding strategies in parallel
+        const [
+          {data: objectives},
+          {data: strategies}
+        ] = await Promise.all([
+          tertiaryDataService.getObjectives(),
+          tertiaryDataService.getBiddingStrategies()
+        ]);
         
-        // Load bidding strategies
-        const {data: strategies} = await tertiaryDataService.getBiddingStrategies();
-        setBiddingStrategies(strategies);
+        updateFieldOptions('projectObjective', objectives);
         updateFieldOptions('bidding.strategy', strategies);
         
         // Clear loading states
@@ -213,12 +154,6 @@ export const TertiaryDataSourceProvider = ({ children }) => {
   // Create the context value with base actions and tertiary-specific actions
   const contextValue = {
     ...baseContextValue,
-    updateBudget,
-    updateBidding,
-    setObjectives,
-    setBudgetTypes,
-    setBiddingStrategies,
-    // No need to add fields again as it's already included in baseContextValue.state
   };
   
   return (

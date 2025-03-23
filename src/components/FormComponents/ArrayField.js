@@ -27,12 +27,16 @@ const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
 
   // Add a new item to the array
   const handleAddItem = () => {
+    // For array operations, we still need to pass the entire array
+    // We'll handle this special case in the parent component
     const newItems = [...value, createEmptyItem()];
     onChange(field.name, newItems);
   };
 
   // Remove an item from the array
   const handleRemoveItem = (index) => {
+    // For array operations, we still need to pass the entire array
+    // We'll handle this special case in the parent component
     const newItems = [...value];
     newItems.splice(index, 1);
     onChange(field.name, newItems);
@@ -40,12 +44,8 @@ const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
 
   // Update a field within an item
   const handleItemFieldChange = (index, fieldName, fieldValue) => {
-    const newItems = [...value];
-    newItems[index] = {
-      ...newItems[index],
-      [fieldName]: fieldValue
-    };
-    onChange(field.name, newItems);
+    // Pass the fully qualified field path to the parent
+    onChange(`${field.name}[${index}].${fieldName}`, fieldValue);
   };
 
   // Get array-level error if any

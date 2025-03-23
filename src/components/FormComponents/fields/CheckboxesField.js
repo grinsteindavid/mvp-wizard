@@ -29,6 +29,7 @@ const CheckboxesField = ({
   };
 
   const values = Array.isArray(value) ? value : [];
+  
 
   return (
     <FieldContainer>

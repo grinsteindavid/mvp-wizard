@@ -21,51 +21,21 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
   
   // Verify that we have the expected data source
   const isContextValid = !!currentSource && typeof currentSource === 'object';
-  
-  console.log('ProjectSetupStep context check:', {
-    source: dataSource,
-    hasContext: isContextValid,
-    contextType: typeof currentSource,
-    contextKeys: isContextValid ? Object.keys(currentSource) : 'none'
-  });
+
 
   /**
    * Handle form field changes
-   * @param {object|function} newDataOrUpdater - Updated form data or updater function
+   * @param {string} field - Field name to update
+   * @param {any} value - New value for the field
    */
-  const handleFormChange = (newDataOrUpdater) => {
-    // Use the data source context's updateField method instead of wizard context
+  const handleFormChange = (field, value) => {
     if (isContextValid && currentSource.updateField) {
-      // Handle both direct objects and functional updates
-      if (typeof newDataOrUpdater === 'function') {
-        // If it's a function, apply it to the current state to get the new state
-        const currentState = currentSource.state || {};
-        const newData = newDataOrUpdater(currentState);
-        
-        // Then update each changed field
-        Object.entries(newData).forEach(([field, value]) => {
-          // Only update if the value has actually changed
-          if (currentState[field] !== value) {
-            currentSource.updateField(field, value);
-          }
-        });
-      } else {
-        // For direct object updates (backward compatibility)
-        Object.entries(newDataOrUpdater).forEach(([field, value]) => {
-          currentSource.updateField(field, value);
-        });
-      }
+      currentSource.updateField(field, value);
     }
   };
 
   // If the required context is missing or invalid, show an error message
   if (!isContextValid) {
-    console.error('Data source context issue:', { 
-      dataSource, 
-      hasContext: !!dataSourceContext,
-      contextType: typeof dataSourceContext
-    });
-    
     return (
       <StepContainer>
         <Title>Error</Title>
