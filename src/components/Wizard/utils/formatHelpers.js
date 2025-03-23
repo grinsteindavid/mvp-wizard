@@ -98,19 +98,19 @@ export const prepareFieldValue = (name, value, fields, parentPath = '') => {
   
   if (field.type === 'group') {
     // For group fields, we need to process each child field
-    // Make sure value is an object before trying to access its properties
-    const groupValue = value && typeof value === 'object' ? value : {};
-    
     return {
       type: 'group',
       key: currentPath,
       label: field.label,
       children: Object.keys(field.fields).map(childName => {
-        // Use field.fields[childName] for the child field definition
-        // and groupValue[childName] for the child field value
+        // Get the child field's value directly from its definition
+        // This ensures we get the correct value for form group child fields
+        const childField = field.fields[childName];
+        const childValue = childField.value;
+        
         return prepareFieldValue(
           childName, 
-          groupValue[childName], 
+          childValue, 
           field.fields, 
           currentPath
         );
