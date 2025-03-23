@@ -42,7 +42,7 @@ const TextField = ({
   // Effect to call the onChange prop when the debounced value changes
   useEffect(() => {
     // Only call onChange if debouncing is enabled and debouncedValue is different from the current value
-    if (useDebouncing && debouncedValue !== value && debouncedValue !== '') {
+    if (useDebouncing && debouncedValue !== value) {
       onChange(field.name, debouncedValue);
     }
   }, [debouncedValue, field.name, onChange, value, useDebouncing]);
