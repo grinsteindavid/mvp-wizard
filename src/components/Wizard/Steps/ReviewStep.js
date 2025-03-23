@@ -3,7 +3,7 @@ import { useWizard } from '../../../contexts/WizardContext';
 import { dataSourceNames } from '../../../contexts/DataSourceFactory';
 import { validateProject } from '../../../services/validationService';
 import ReviewFieldRenderer from '../components/ReviewFieldRenderer';
-import { prepareFieldValue } from '../utils/formatHelpers';
+import { prepareFieldValue, transformFieldsForValidation } from '../utils/formatHelpers';
 import {
   StepContainer,
   Title,
@@ -42,9 +42,15 @@ const ReviewStep = ({ dataSourceContext }) => {
       setValidationErrors({ general: 'No project data available' });
       return;
     }
+
+    // Transform fields to the format expected by validation schema
+    // using the utility function
+    const transformedData = transformFieldsForValidation(currentSource.state.fields);
     
-    // Validate the project data
-    const validationResult = validateProject(sourceId, currentSource.state.fields);
+    console.log('Transformed data for validation:', transformedData);
+    
+    // Validate the transformed project data
+    const validationResult = validateProject(sourceId, transformedData);
     
     // Use the data source context's setValidationResult
     currentSource.setValidationResult(validationResult);

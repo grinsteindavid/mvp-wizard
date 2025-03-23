@@ -1,4 +1,45 @@
 /**
+ * Transform field data structure for validation
+ * @param {object} fields - The fields object from state.fields
+ * @returns {object} - Transformed data in the format expected by validation schemas
+ */
+export const transformFieldsForValidation = (fields) => {
+  if (!fields || typeof fields !== 'object') {
+    return {};
+  }
+
+  const transformedData = {};
+
+  Object.keys(fields).forEach(fieldName => {
+    // Make sure the field and its value exist
+    const field = fields[fieldName];
+    if (field && field.hasOwnProperty('value')) {
+      const { value, type } = field;
+
+      // Transform based on field type, not field name
+      if (type === 'array' && Array.isArray(value)) {
+        // Array fields - keep the array structure
+        transformedData[fieldName] = value;
+      } else if (type === 'number' && value !== undefined) {
+        // Number fields - ensure they're converted to numbers
+        transformedData[fieldName] = Number(value);
+      } else if (type === 'multiselect' && Array.isArray(value)) {
+        // Multiselect fields - keep the array of selections
+        transformedData[fieldName] = value;
+      } else if (type === 'boolean' && value !== undefined) {
+        // Boolean fields - ensure they're boolean type
+        transformedData[fieldName] = Boolean(value);
+      } else {
+        // Standard case for other fields (string, select, etc.)
+        transformedData[fieldName] = value;
+      }
+    }
+  });
+
+  return transformedData;
+};
+
+/**
  * Format a value for display based on its field type and content
  * @param {any} value - The value to format
  * @param {object} field - The field definition containing type and options

@@ -18,6 +18,7 @@
 - Create abstraction layers for complex operations
 - Use meaningful variable and function names
 - DO NOT create files for examples
+- Avoid hard-coding variables, functions, or logic that is too specific and not reusable
 
 
 ## Component Structure
