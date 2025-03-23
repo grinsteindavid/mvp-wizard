@@ -33,7 +33,11 @@ const withFieldMemoization = (FieldComponent) => {
     if (prevProps.loading !== nextProps.loading) primitiveChanges.loading = { prev: prevProps.loading, next: nextProps.loading };
     if (prevProps.field.name !== nextProps.field.name) primitiveChanges['field.name'] = { prev: prevProps.field.name, next: nextProps.field.name };
     if (prevProps.field.type !== nextProps.field.type) primitiveChanges['field.type'] = { prev: prevProps.field.type, next: nextProps.field.type };
-    if (prevProps.onBlur !== nextProps.onBlur) primitiveChanges.onBlur = { prev: 'function', next: 'function (changed ref)' };
+    
+    // INTENTIONALLY NOT comparing onBlur and onChange function references
+    // Function references change on every render but their implementation is stable
+    // so we don't need to re-render when only these references change
+
     
     if (Object.keys(primitiveChanges).length > 0) {
       if (process.env.NODE_ENV === 'development') {

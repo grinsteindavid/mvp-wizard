@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FormField from './FormField';
 import FormGroup from './FormGroup';
 import ArrayField from './ArrayField';
@@ -21,7 +21,7 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
   const combinedErrors = { ...fieldErrors, ...errors };
 
   // Validate a single field
-  const validateSingleField = (name, value) => {
+  const validateSingleField = useCallback((name, value) => {
     const field = fields[name];
     
     // Skip validation if no field or no validation schema
@@ -42,9 +42,9 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
     }
     
     return validationResult;
-  };
+  }, [fields, validationSchema, onValidate]);
 
-  const handleFieldChange = (name, value) => {
+  const handleFieldChange = useCallback((name, value) => {
     // Update the form values by directly passing field name and value
     onChange(name, value);
     
@@ -52,7 +52,24 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
     setTimeout(() => {
       validateSingleField(name, value);
     }, 300);
-  };
+  }, [onChange, validateSingleField]);
+
+  // Use a stable object to store handlers by field name
+  const handlersRef = React.useRef({});
+
+  // Update handler references when dependencies change
+  useEffect(() => {
+    // Only recreate handlers if dependencies change
+    Object.keys(fields || {}).forEach((fieldName) => {
+      handlersRef.current[fieldName] = {
+        onBlur: () => {
+          if (validationSchema && fields[fieldName]) {
+            validateSingleField(fieldName, fields[fieldName].value);
+          }
+        }
+      };
+    });
+  }, [fields, validationSchema, validateSingleField]);
 
   // Clear field errors when fields change significantly
   useEffect(() => {
@@ -76,12 +93,8 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
         // Get any error for this field from combined errors
         const fieldError = combinedErrors ? combinedErrors[fieldName] : undefined;
         
-        // Handle blur event for validation
-        const handleBlur = () => {
-          if (validationSchema) {
-            validateSingleField(fieldName, field.value);
-          }
-        };
+        // Get the stable blur handler from our ref
+        const handleBlur = handlersRef.current[fieldName]?.onBlur;
         
         // Render the appropriate component based on field type
         switch (field.type) {
