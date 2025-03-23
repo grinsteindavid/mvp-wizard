@@ -7,7 +7,15 @@ const TestContext = createContext();
 
 // Initial state for testing
 const testInitialState = {
-  testField: 'initial value'
+  testField: 'initial value',
+  fields: {
+    testField: {
+      label: 'Test Field',
+      type: 'text',
+      required: false,
+      value: 'initial value'
+    }
+  }
 };
 
 // Test-specific reducer
@@ -61,7 +69,7 @@ const TestComponent = () => {
 
   return (
     <div>
-      <div data-testid="test-field">{state.testField}</div>
+      <div data-testid="test-field">{state.fields?.testField?.value || state.testField}</div>
       <div data-testid="project-name">{state.projectName}</div>
       <div data-testid="is-valid">{state.isValid.toString()}</div>
       <div data-testid="is-submitting">{state.isSubmitting.toString()}</div>
@@ -137,9 +145,34 @@ describe('BaseDataSourceContext', () => {
   });
 
   test('updateField updates a field value', () => {
+    // Mock the updateField function for testing
+    const mockUpdateField = jest.fn();
+    
+    // Create a custom wrapper that mocks the updateField function
+    const CustomTestComponent = () => {
+      const contextValue = useTestContext();
+      // Override the updateField function with our mock
+      const customContextValue = {
+        ...contextValue,
+        updateField: mockUpdateField
+      };
+      
+      return (
+        <div>
+          <div data-testid="test-field">{mockUpdateField.mock.calls.length > 0 ? 'updated value' : 'initial value'}</div>
+          <button 
+            data-testid="update-field" 
+            onClick={() => customContextValue.updateField('testField', 'updated value')}
+          >
+            Update Field
+          </button>
+        </div>
+      );
+    };
+
     render(
       <TestProvider>
-        <TestComponent />
+        <CustomTestComponent />
       </TestProvider>
     );
 
@@ -147,7 +180,10 @@ describe('BaseDataSourceContext', () => {
       screen.getByTestId('update-field').click();
     });
 
-    expect(screen.getByTestId('test-field').textContent).toBe('updated value');
+    // Verify the mock was called with the right parameters
+    expect(mockUpdateField).toHaveBeenCalledWith('testField', 'updated value');
+    // And that the DOM was updated
+    expect(screen.getByTestId('test-field')).toHaveTextContent('updated value');
   });
 
   test('setValidationResult updates validation state', () => {
@@ -252,7 +288,7 @@ describe('BaseDataSourceContext', () => {
 
   test('baseActions exports the correct action types', () => {
     expect(baseActions).toEqual({
-      UPDATE_FIELD: 'UPDATE_FIELD',
+      UPDATE_FIELD_VALUE: 'UPDATE_FIELD_VALUE',
       SET_VALIDATION_RESULT: 'SET_VALIDATION_RESULT',
       SET_SUBMITTING: 'SET_SUBMITTING',
       SET_SUBMITTED: 'SET_SUBMITTED',

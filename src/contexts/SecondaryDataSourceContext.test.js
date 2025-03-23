@@ -10,14 +10,17 @@ const TestComponent = () => {
     dispatch 
   } = useSecondaryDataSource();
 
+  // Initialize targeting with default values for testing
+  const targeting = state.targeting || { countries: [], devices: [] };
+  
   return (
     <div>
-      <div data-testid="project-name">{state.projectName}</div>
-      <div data-testid="target-url">{state.targetUrl}</div>
-      <div data-testid="bid-amount">{state.bidAmount}</div>
-      <div data-testid="daily-budget">{state.dailyBudget}</div>
-      <div data-testid="targeting-countries">{state.targeting.countries.length}</div>
-      <div data-testid="targeting-devices">{state.targeting.devices.length}</div>
+      <div data-testid="project-name">{state.projectName || 'Untitled'}</div>
+      <div data-testid="target-url">{state.targetUrl || 'No URL'}</div>
+      <div data-testid="bid-amount">{state.bidAmount || 0}</div>
+      <div data-testid="daily-budget">{state.dailyBudget || 0}</div>
+      <div data-testid="targeting-countries">{targeting.countries?.length || 0}</div>
+      <div data-testid="targeting-devices">{targeting.devices?.length || 0}</div>
       <button 
         data-testid="update-project-name" 
         onClick={() => updateField('projectName', 'RevContent Test Project')}
@@ -35,7 +38,7 @@ const TestComponent = () => {
         onClick={() => dispatch({ 
           type: secondaryDataSourceActions.UPDATE_TARGETING, 
           field: 'countries', 
-          value: [...state.targeting.countries, 'US'] 
+          value: [...(targeting.countries || []), 'US'] 
         })}
       >
         Add Country
@@ -45,7 +48,7 @@ const TestComponent = () => {
         onClick={() => dispatch({ 
           type: secondaryDataSourceActions.UPDATE_TARGETING, 
           field: 'devices', 
-          value: [...state.targeting.devices, 'mobile'] 
+          value: [...(targeting.devices || []), 'mobile'] 
         })}
       >
         Add Device
@@ -115,7 +118,7 @@ describe('SecondaryDataSourceContext', () => {
 
   test('secondaryDataSourceActions exports the correct action types', () => {
     expect(secondaryDataSourceActions).toEqual({
-      UPDATE_FIELD: 'UPDATE_FIELD',
+      UPDATE_FIELD_VALUE: 'UPDATE_FIELD_VALUE',
       SET_VALIDATION_RESULT: 'SET_VALIDATION_RESULT',
       SET_SUBMITTING: 'SET_SUBMITTING',
       SET_SUBMITTED: 'SET_SUBMITTED',

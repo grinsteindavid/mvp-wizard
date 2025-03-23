@@ -11,12 +11,14 @@ describe('FormGroup', () => {
       firstName: {
         type: 'text',
         name: 'firstName',
-        label: 'First Name'
+        label: 'First Name',
+        value: 'John'  // Add value directly to field definition
       },
       lastName: {
         type: 'text',
         name: 'lastName',
-        label: 'Last Name'
+        label: 'Last Name',
+        value: 'Doe'   // Add value directly to field definition
       }
     }
   };
@@ -30,7 +32,6 @@ describe('FormGroup', () => {
     render(
       <FormGroup 
         field={mockField} 
-        values={mockValues} 
         onChange={() => {}} 
         errors={{}} 
       />
@@ -45,7 +46,6 @@ describe('FormGroup', () => {
     render(
       <FormGroup 
         field={mockField} 
-        values={mockValues} 
         onChange={() => {}} 
         errors={{}} 
       />
@@ -61,7 +61,6 @@ describe('FormGroup', () => {
     render(
       <FormGroup 
         field={mockField} 
-        values={mockValues} 
         onChange={handleChange} 
         errors={{}} 
       />

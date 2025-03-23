@@ -15,7 +15,7 @@ const TestConsumer = ({ contextValue }) => {
     <div>
       <div data-testid="has-context">true</div>
       <div data-testid="has-state">{contextValue.state ? 'true' : 'false'}</div>
-      <div data-testid="has-fields">{contextValue.fields ? 'true' : 'false'}</div>
+      <div data-testid="has-fields">{contextValue.state && contextValue.state.fields ? 'true' : 'false'}</div>
       <div data-testid="has-update-field">{typeof contextValue.updateField === 'function' ? 'true' : 'false'}</div>
     </div>
   );

@@ -167,7 +167,7 @@ describe('PrimaryDataSourceContext', () => {
 
   test('primaryDataSourceActions exports the correct action types', () => {
     expect(primaryDataSourceActions).toEqual({
-      UPDATE_FIELD: 'UPDATE_FIELD',
+      UPDATE_FIELD_VALUE: 'UPDATE_FIELD_VALUE',
       SET_VALIDATION_RESULT: 'SET_VALIDATION_RESULT',
       SET_SUBMITTING: 'SET_SUBMITTING',
       SET_SUBMITTED: 'SET_SUBMITTED',
