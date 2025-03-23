@@ -35,21 +35,41 @@ export const Input = styled.input`
 `;
 
 export const TextArea = styled.textarea`
+  box-sizing: border-box;
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px;
   border: 1px solid ${props => props.hasError ? '#e53935' : '#ddd'};
   border-radius: 4px;
   font-size: 14px;
   min-height: 100px;
   resize: vertical;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease-in-out;
+  background-color: ${props => props.disabled ? '#f5f5f5' : 'white'};
+  color: #333;
+  font-family: inherit;
+  margin: 0;
+  
+  &::placeholder {
+    color: #757575;
+    font-style: italic;
+  }
   
   &:focus {
     outline: none;
     border-color: ${props => props.hasError ? '#e53935' : '#4285f4'};
     box-shadow: 0 0 0 2px ${props => props.hasError ? 'rgba(229, 57, 53, 0.2)' : 'rgba(66, 133, 244, 0.2)'};
   }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  
+  ${props => props.hasError && `
+    background-color: rgba(229, 57, 53, 0.03);
+  `}
 `;
+
 
 export const Select = styled.select`
   width: 100%;
