@@ -8,37 +8,33 @@ const SecondaryDataSourceContext = createContext();
 
 // Initial state specific to Secondary Data Source - aligned with secondarySchema
 const initialState = {
-  projectName: '',
-  targetUrl: '',
-  bidAmount: '',
-  dailyBudget: '',
-  targeting: {
-    countries: [],
-    devices: []
-  },
   fields: {
     projectName: {
       label: 'Project Name',
       type: 'text',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('secondary', 'projectName', value, formData)
     },
     targetUrl: {
       label: 'Target URL',
       type: 'url',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('secondary', 'targetUrl', value, formData)
     },
     bidAmount: {
       label: 'Bid Amount',
       type: 'number',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('secondary', 'bidAmount', value, formData)
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('secondary', 'dailyBudget', value, formData)
     },
     targeting: {
@@ -51,6 +47,8 @@ const initialState = {
           type: 'multiselect',
           options: [],
           required: true,
+          value: [],
+          loading: false, // Initialize loading state
           validateField: (value, formData) => validateField('secondary', 'targeting.countries', value, formData)
         },
         devices: {
@@ -58,6 +56,8 @@ const initialState = {
           type: 'checkboxes',
           options: [],
           required: true,
+          value: [],
+          loading: false, // Initialize loading state
           validateField: (value, formData) => validateField('secondary', 'targeting.devices', value, formData)
         }
       }

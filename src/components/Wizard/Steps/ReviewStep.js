@@ -44,7 +44,7 @@ const ReviewStep = ({ dataSourceContext }) => {
     }
     
     // Validate the project data
-    const validationResult = validateProject(sourceId, currentSource.state);
+    const validationResult = validateProject(sourceId, currentSource.state.fields);
     
     // Use the data source context's setValidationResult
     currentSource.setValidationResult(validationResult);

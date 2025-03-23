@@ -8,29 +8,20 @@ const TertiaryDataSourceContext = createContext();
 
 // Initial state specific to Tertiary Data Source - aligned with tertiarySchema
 const initialState = {
-  projectName: '',
-  projectObjective: '',
-  startDate: '',
-  endDate: '',
-  budget: {
-    amount: '',
-    type: ''
-  },
-  bidding: {
-    strategy: '',
-    amount: ''
-  },
   fields: {
     projectName: {
       label: 'Project Name',
       type: 'text',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('tertiary', 'projectName', value, formData)
     },
     projectObjective: {
       label: 'Project Objective',
       type: 'select',
       required: true,
+      value: '',
+      loading: false, // Initialize loading state
       options: [],
       validateField: (value, formData) => validateField('tertiary', 'projectObjective', value, formData)
     },
@@ -38,12 +29,14 @@ const initialState = {
       label: 'Start Date',
       type: 'date',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('tertiary', 'startDate', value, formData)
     },
     endDate: {
       label: 'End Date',
       type: 'date',
       required: false,
+      value: '',
       validateField: (value, formData) => validateField('tertiary', 'endDate', value, formData)
     },
     budget: {
@@ -55,12 +48,14 @@ const initialState = {
           label: 'Amount',
           type: 'number',
           required: true,
+          value: '',
           validateField: (value, formData) => validateField('tertiary', 'budget.amount', value, formData)
         },
         type: {
           label: 'Budget Type',
           type: 'select',
           required: true,
+          value: '',
           options: [
             { value: 'daily', label: 'Daily Budget' },
             { value: 'lifetime', label: 'Lifetime Budget' }
@@ -79,12 +74,15 @@ const initialState = {
           type: 'select',
           options: [],
           required: true,
+          value: '',
+          loading: false, // Initialize loading state
           validateField: (value, formData) => validateField('tertiary', 'bidding.strategy', value, formData)
         },
         amount: {
           label: 'Bid Amount',
           type: 'number',
           required: false,
+          value: '',
           dependsOn: { field: 'strategy', value: 'manual' },
           validateField: (value, formData) => validateField('tertiary', 'bidding.amount', value, formData)
         }
@@ -148,6 +146,8 @@ export const TertiaryDataSourceProvider = ({ children }) => {
     };
 
     loadData();
+    // These functions are stable references from the context value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   

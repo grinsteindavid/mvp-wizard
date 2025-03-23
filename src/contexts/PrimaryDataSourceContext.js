@@ -8,28 +8,27 @@ const PrimaryDataSourceContext = createContext();
 
 // Initial state specific to Primary Integration - aligned with primarySchema
 const initialState = {
-  projectName: '',
-  dailyBudget: '',
-  bidStrategy: '',
-  keywords: '',
-  categoryGroups: [],
   fields: {
     projectName: {
       label: 'Project Name',
       type: 'text',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('primary', 'projectName', value, formData)
     },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
       required: true,
+      value: '',
       validateField: (value, formData) => validateField('primary', 'dailyBudget', value, formData)
     },
     bidStrategy: {
       label: 'Bid Strategy',
       type: 'select',
       required: true,
+      value: '',
+      loading: false, // Initialize loading state
       options: [], // Will be populated via dispatch when strategies are loaded
       validateField: (value, formData) => validateField('primary', 'bidStrategy', value, formData)
     },
@@ -37,6 +36,7 @@ const initialState = {
       label: 'Keywords',
       type: 'textarea',
       required: true,
+      value: '',
       placeholder: 'Enter keywords separated by commas',
       validateField: (value, formData) => validateField('primary', 'keywords', value, formData)
     },
@@ -44,6 +44,8 @@ const initialState = {
       label: 'Category Groups',
       type: 'array',
       required: true,
+      value: [],
+      loading: false, // Initialize loading state
       validateField: (value, formData) => validateField('primary', 'categoryGroups', value, formData),
       fields: {
         name: {
@@ -111,6 +113,8 @@ export const PrimaryDataSourceProvider = ({ children }) => {
     };
     
     loadData();
+    // These functions are stable references from the context value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Create the context value with base actions and primary-specific actions

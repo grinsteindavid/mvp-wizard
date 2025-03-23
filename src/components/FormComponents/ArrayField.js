@@ -9,13 +9,17 @@ import {
   Button, 
   ErrorMessage 
 } from './styled/FormElements';
-import { get } from 'lodash';
+
 
 /**
  * ArrayField component for handling arrays of form fields.
  * Allows adding, removing, and editing items in the array.
+ * Updated to work with field values and loading states stored within field definitions.
  */
-const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
+const ArrayField = ({ field, onChange, errors }) => {
+  // Get the array value from the field definition
+  const value = field.value || [];
+  
   // Create a new empty item based on the field configuration
   const createEmptyItem = () => {
     const item = {};
@@ -65,11 +69,9 @@ const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
             // Create a field object that FormField can use
             const formField = {
               ...fieldConfig,
-              name: fieldName
+              name: fieldName,
+              value: item[fieldName] // Set the value from the array item
             };
-            
-            // Get the current value for this field from the item
-            const fieldValue = item[fieldName];
             
             // Get any error for this specific field in this specific item
             const fieldError = errors ? errors[`${field.name}[${index}].${fieldName}`] : undefined;
@@ -78,10 +80,10 @@ const ArrayField = ({ field, value = [], onChange, errors, loadingFields }) => {
               <FormField
                 key={fieldName}
                 field={formField}
-                value={fieldValue}
+                value={item[fieldName]}
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
-                loading={get(loadingFields, fieldName)}
+                loading={fieldConfig.loading}
               />
             );
           })}

@@ -1,13 +1,14 @@
 import React from 'react';
 import FormField from './FormField';
 import { GroupContainer, GroupTitle } from './styled/FormElements';
-import {get} from 'lodash';
+
 
 /**
  * FormGroup component for rendering a group of related form fields.
  * Groups fields together visually and handles nested field values.
+ * Updated to work with field values and loading states stored within field definitions.
  */
-const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
+const FormGroup = ({ field, onChange, errors }) => {
   const handleFieldChange = (fieldName, fieldValue) => {
     // Pass the fully qualified field name to the parent
     onChange(`${field.name}.${fieldName}`, fieldValue);
@@ -23,9 +24,6 @@ const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
           name: fieldName
         };
         
-        // Get the current value for this field from the group values
-        const fieldValue = values ? values[fieldName] : undefined;
-        
         // Get any error for this field
         const fieldError = errors ? errors[`${field.name}.${fieldName}`] : undefined;
         
@@ -33,10 +31,10 @@ const FormGroup = ({ field, values, onChange, errors, loadingFields }) => {
           <FormField
             key={fieldName}
             field={formField}
-            value={fieldValue}
+            value={fieldConfig.value}
             onChange={handleFieldChange}
             error={fieldError}
-            loading={get(loadingFields, fieldName)}
+            loading={fieldConfig.loading}
           />
         );
       })}

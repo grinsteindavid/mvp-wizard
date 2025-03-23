@@ -3,15 +3,15 @@ import FormField from './FormField';
 import FormGroup from './FormGroup';
 import ArrayField from './ArrayField';
 import { FormContainer } from './styled/FormElements';
-import { get } from 'lodash';
 
 /**
  * DynamicForm component that renders a form based on a configuration object.
  * Supports different field types including groups and arrays.
  * Now with field-level validation using the validateField function from field definitions.
- * Also supports loading state for fields.
+ * Also supports loading state from field definitions.
+ * Updated to work with field values and loading states stored within field definitions.
  */
-const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFields = {} }) => {
+const DynamicForm = ({ fields, onChange, errors, onValidate }) => {
   // Local state for field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
   
@@ -25,8 +25,11 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
     // Skip validation if the field doesn't have a validateField function
     if (!field || !field.validateField) return;
     
+    // Create a formData object from field values for validation context
+    const formData = createFormDataFromFields(fields);
+    
     // Call the field's validateField function
-    const validationResult = field.validateField(value, values);
+    const validationResult = field.validateField(value, formData);
     
     // Update the local field errors
     setFieldErrors(prev => ({
@@ -42,6 +45,22 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
     return validationResult;
   };
 
+  // Helper function to create a flat form data object from fields with values
+  const createFormDataFromFields = (fieldsObj, prefix = '') => {
+    return Object.entries(fieldsObj).reduce((acc, [key, field]) => {
+      const fieldPath = prefix ? `${prefix}.${key}` : key;
+      
+      if (field.type === 'group' && field.fields) {
+        // For group fields, recursively process nested fields
+        const nestedValues = createFormDataFromFields(field.fields, fieldPath);
+        return { ...acc, [key]: nestedValues, ...nestedValues };
+      } else {
+        // For regular fields, just get the value
+        return { ...acc, [fieldPath]: field.value };
+      }
+    }, {});
+  };
+
   const handleFieldChange = (name, value) => {
     // Update the form values by directly passing field name and value
     onChange(name, value);
@@ -52,14 +71,11 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
     }, 300);
   };
 
-  // Validate all fields when values change significantly
+  // Clear field errors when fields change significantly
   useEffect(() => {
-    // Skip validation on initial render or when values is undefined
-    if (!values) return;
-    
-    // Clear field errors when values change significantly
+    if (!fields) return;
     setFieldErrors({});
-  }, [values]);
+  }, [fields]);
 
   if (!fields) {
     return <div>No form fields available</div>;
@@ -74,16 +90,13 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
           name: fieldName
         };
         
-        // Get the current value for this field
-        const fieldValue = values ? values[fieldName] : undefined;
-        
         // Get any error for this field from combined errors
         const fieldError = combinedErrors ? combinedErrors[fieldName] : undefined;
         
         // Handle blur event for validation
         const handleBlur = () => {
           if (field.validateField) {
-            validateSingleField(fieldName, fieldValue);
+            validateSingleField(fieldName, field.value);
           }
         };
         
@@ -94,10 +107,8 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
               <FormGroup
                 key={fieldName}
                 field={field}
-                values={fieldValue}
                 onChange={handleFieldChange}
                 errors={combinedErrors}
-                loadingFields={loadingFields}
               />
             );
           case 'array':
@@ -105,10 +116,8 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
               <ArrayField
                 key={fieldName}
                 field={field}
-                value={fieldValue}
                 onChange={handleFieldChange}
                 errors={combinedErrors}
-                loadingFields={loadingFields}
               />
             );
           default:
@@ -116,11 +125,11 @@ const DynamicForm = ({ fields, values, onChange, errors, onValidate, loadingFiel
               <FormField
                 key={fieldName}
                 field={field}
-                value={fieldValue}
+                value={field.value}
                 onChange={handleFieldChange}
                 onBlur={handleBlur}
                 error={fieldError}
-                loading={get(loadingFields, fieldName)}
+                loading={field.loading}
               />
             );
         }
