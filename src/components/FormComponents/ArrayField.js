@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { produce } from 'immer';
 import FormField from './FormField';
 import { 
@@ -20,6 +20,11 @@ const ArrayField = ({ field, onChange, errors }) => {
   // Ensure we always have a valid array value
   const arrayValue = Array.isArray(field.value) ? field.value : [];
   
+  // Use a ref to keep track of the most recent values
+  // This ensures we don't lose changes when multiple fields are updated
+  const latestValuesRef = useRef(arrayValue);
+  latestValuesRef.current = arrayValue;
+  
   // Create a new empty item based on the field configuration
   const createEmptyItem = () => {
     const item = {};
@@ -32,7 +37,7 @@ const ArrayField = ({ field, onChange, errors }) => {
   // Add a new item to the array
   const handleAddItem = () => {
     // Use Immer to create an immutable update
-    const newItems = produce(arrayValue, draft => {
+    const newItems = produce(latestValuesRef.current, draft => {
       draft.push(createEmptyItem());
     });
     
@@ -43,10 +48,10 @@ const ArrayField = ({ field, onChange, errors }) => {
   // Remove an item from the array
   const handleRemoveItem = (index) => {
     // Validate index is within bounds
-    if (index < 0 || index >= arrayValue.length) return;
+    if (index < 0 || index >= latestValuesRef.current.length) return;
     
     // Use Immer to create an immutable update
-    const newItems = produce(arrayValue, draft => {
+    const newItems = produce(latestValuesRef.current, draft => {
       draft.splice(index, 1);
     });
     
@@ -56,11 +61,10 @@ const ArrayField = ({ field, onChange, errors }) => {
   // Update a field within an item
   const handleItemFieldChange = (index, fieldName, fieldValue) => {
     // Validate index is within bounds
-    if (index < 0 || index >= arrayValue.length) return;
+    if (index < 0 || index >= latestValuesRef.current.length) return;
     
     // Use Immer to create an immutable update
-    const newItems = produce(arrayValue, draft => {
-      // Update the specific field while preserving other fields
+    const newItems = produce(latestValuesRef.current, draft => {
       draft[index][fieldName] = fieldValue;
     });
     
@@ -78,7 +82,7 @@ const ArrayField = ({ field, onChange, errors }) => {
       {arrayValue.map((item, index) => (
         <ArrayItemContainer key={`${field.name}-item-${index}`}>
           <ArrayItemActions>
-            <ActionButton danger onClick={() => handleRemoveItem(index)}>×</ActionButton>
+            <ActionButton onClick={() => handleRemoveItem(index)}>×</ActionButton>
           </ArrayItemActions>
           
           {Object.entries(field.fields).map(([fieldName, fieldConfig]) => {
@@ -86,7 +90,6 @@ const ArrayField = ({ field, onChange, errors }) => {
             const formField = {
               ...fieldConfig,
               name: fieldName,
-              // Don't set value in the field object, we'll use the value prop instead
             };
             
             // Get any error for this specific field in this specific item
@@ -96,7 +99,7 @@ const ArrayField = ({ field, onChange, errors }) => {
               <FormField
                 key={`${field.name}-${index}-${fieldName}`}
                 field={formField}
-                value={item[fieldName] || ''}
+                value={item[fieldName] !== undefined ? item[fieldName] : ''}
                 onChange={(name, value) => handleItemFieldChange(index, name, value)}
                 error={fieldError}
                 loading={fieldConfig.loading}

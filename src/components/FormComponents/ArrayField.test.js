@@ -152,6 +152,9 @@ describe('ArrayField', () => {
     // Reset the mock to track the next change
     handleChange.mockClear();
     
+    // Verify the street field still has the updated value after re-render
+    expect(screen.getByDisplayValue('789 Pine St')).toBeInTheDocument();
+    
     // Now change the city field
     fireEvent.change(screen.getAllByDisplayValue('New York')[0], {
       target: { value: 'San Francisco' }
