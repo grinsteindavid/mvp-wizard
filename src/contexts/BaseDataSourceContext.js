@@ -1,7 +1,7 @@
 import produce from 'immer';
 import React, { createContext, useContext, useReducer } from 'react';
 import { set } from 'lodash';
-import { updateFieldValue, applyFieldValidation, buildNestedFieldPath } from './utils/fieldUtils';
+import { updateFieldValue, applyFieldValidation, buildNestedFieldPath, normalizeArrayFieldPath } from './utils/fieldUtils';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -45,6 +45,13 @@ const baseReducer = (state, action) => {
       return produce(state, draft => {
         draft.isValid = action.payload.isValid;
         draft.errors = action.payload.errors || {};
+        
+        // Mark fields with errors as touched
+        if (draft.errors && Object.keys(draft.errors).length > 0) {
+          Object.keys(draft.errors).forEach(fieldPath => {
+            draft.touchedFields[normalizeArrayFieldPath(fieldPath)] = true;
+          });
+        }
       });
     case baseReducerActions.SET_SUBMITTING:
       return produce(state, draft => {
