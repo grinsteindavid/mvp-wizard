@@ -96,7 +96,6 @@ export const createBaseActions = (dispatch) => ({
   },
   
   validateFieldOnBlur: (field, validationSchema) => {
-    console.log('Validating field on blur:', field);
     dispatch({ type: baseReducerActions.VALIDATE_FIELD_ON_BLUR, field, validationSchema });
   },
   
