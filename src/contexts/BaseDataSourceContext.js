@@ -1,8 +1,7 @@
 import produce from 'immer';
 import React, { createContext, useContext, useReducer } from 'react';
 import { set } from 'lodash';
-import { validateAndUpdateErrors } from '../utils/validationUtils';
-import { transformFieldsForValidation } from '../components/Wizard/utils/formatHelpers';
+import { updateFieldValue, applyFieldValidation, buildNestedFieldPath } from './utils/fieldUtils';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -29,65 +28,11 @@ const baseReducer = (state, action) => {
   switch (action.type) {
     case baseReducerActions.UPDATE_FIELD_VALUE:
       return produce(state, draft => {
-        // Handle nested fields like 'targeting.countries'
-        const parts = action.field.split('.');
+        // Update field value using the utility function
+        updateFieldValue(draft, action.field, action.value);
         
-        // We'll validate the entire form state instead of individual fields
-        
-        // Use the utility function to validate and update errors
-        const applyValidationResults = () => {
-          // Use transformFieldsForValidation to build the complete form data object
-          // This handles nested fields, array fields, and type conversions
-          const formData = transformFieldsForValidation(draft.fields);
-          
-          if (action.validationSchema) {
-            // Call the utility function to get validation results
-            const validationResult = validateAndUpdateErrors(
-              formData,
-              action.field,
-              action.value,
-              action.validationSchema
-            );
-            
-            // Clear all previous errors first
-            draft.errors = validationResult.errors;
-            draft.isValid = validationResult.isValid;
-          } else {
-            // If no schema provided, just clear the error for this field
-            if (draft.errors && draft.errors[action.field]) {
-              delete draft.errors[action.field];
-            }
-          }
-        };
-        
-        if (parts.length > 1) {
-          // For nested fields, construct the path to the value property
-          // Format: fields.groupName.fields.fieldName.value
-          const nestedPath = parts.reduce((path, part, index) => {
-            if (index === 0) {
-              // First part is the top-level field name
-              return `fields.${part}`;
-            } else if (index < parts.length - 1) {
-              // Middle parts need to include 'fields.' prefix
-              return `${path}.fields.${part}`;
-            } else {
-              // Last part is the actual field name
-              return `${path}.fields.${part}.value`;
-            }
-          }, '');
-          
-          // Update the field value
-          set(draft, nestedPath, action.value);
-          
-          // Validate with context
-          applyValidationResults();
-        } else {
-          // For top-level fields, use the simple path
-          set(draft, `fields.${action.field}.value`, action.value);
-          
-          // Validate with context
-          applyValidationResults();
-        }
+        // Apply validation using the utility function
+        applyFieldValidation(draft, action.field, action.value, action.validationSchema);
       });
     case baseReducerActions.SET_VALIDATION_RESULT:
       return produce(state, draft => {
@@ -104,25 +49,11 @@ const baseReducer = (state, action) => {
       });
     case baseReducerActions.SET_FIELD_LOADING:
       return produce(state, draft => {
-        // Handle nested fields like 'targeting.countries'
         const parts = action.field.split('.');
         
         if (parts.length > 1) {
-          // For nested fields, construct the path to the loading property
-          // Format: fields.groupName.fields.fieldName.loading
-          const nestedPath = parts.reduce((path, part, index) => {
-            if (index === 0) {
-              // First part is the top-level field name
-              return `fields.${part}`;
-            } else if (index < parts.length - 1) {
-              // Middle parts need to include 'fields.' prefix
-              return `${path}.fields.${part}`;
-            } else {
-              // Last part is the actual field name
-              return `${path}.fields.${part}.loading`;
-            }
-          }, '');
-          
+          // For nested fields, use the buildNestedFieldPath utility
+          const nestedPath = buildNestedFieldPath(parts, 'loading');
           set(draft, nestedPath, action.isLoading);
         } else {
           // For top-level fields, use the simple path
@@ -131,25 +62,11 @@ const baseReducer = (state, action) => {
       });
     case baseReducerActions.UPDATE_FIELD_OPTIONS:
       return produce(state, draft => {
-        // Handle nested fields like 'targeting.countries'
         const parts = action.fieldName.split('.');
         
         if (parts.length > 1) {
-          // For nested fields, construct the path correctly
-          // Format: fields.groupName.fields.fieldName.options
-          const nestedPath = parts.reduce((path, part, index) => {
-            if (index === 0) {
-              // First part is the top-level field name
-              return `fields.${part}`;
-            } else if (index < parts.length - 1) {
-              // Middle parts need to include 'fields.' prefix
-              return `${path}.fields.${part}`;
-            } else {
-              // Last part is the actual field name
-              return `${path}.fields.${part}.options`;
-            }
-          }, '');
-          
+          // For nested fields, use the buildNestedFieldPath utility
+          const nestedPath = buildNestedFieldPath(parts, 'options');
           set(draft, nestedPath, action.options);
         } else {
           // For top-level fields, use the simple path
