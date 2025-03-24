@@ -47,9 +47,19 @@ const baseReducer = (state, action) => {
           }, '');
           
           set(draft, nestedPath, action.value);
+          
+          // Clear the corresponding error when field is updated
+          if (draft.errors && draft.errors[action.field]) {
+            delete draft.errors[action.field];
+          }
         } else {
           // For top-level fields, use the simple path
           set(draft, `fields.${action.field}.value`, action.value);
+          
+          // Clear the corresponding error when field is updated
+          if (draft.errors && draft.errors[action.field]) {
+            delete draft.errors[action.field];
+          }
         }
       });
     case baseReducerActions.SET_VALIDATION_RESULT:
