@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { produce } from 'immer';
+import { get } from 'lodash';
 import FormField from './FormField';
 import { 
   ArrayContainer, 
@@ -16,7 +17,7 @@ import {
  * Allows adding, removing, and editing items in the array.
  * Completely refactored to ensure proper state management for array operations.
  */
-const ArrayField = ({ field, onChange, errors }) => {
+const ArrayField = ({ field, onChange, errors, onBlur }) => {
   // Ensure we always have a valid array value
   const arrayValue = Array.isArray(field.value) ? field.value : [];
   
@@ -91,10 +92,18 @@ const ArrayField = ({ field, onChange, errors }) => {
               ...fieldConfig,
               name: fieldName,
             };
+
+            const handleBlur = (fieldName) => {
+              // Pass the fully qualified field name to the parent with index
+              onBlur(`${field.name}[${index}].${fieldName}`);
+            };
             
             // Get any error for this specific field in this specific item
             // Support dot notation format (array.index.field) for errors
-            const fieldError = errors ? (errors[`${field.name}.${index}.${fieldName}`] || errors[`${field.name}[${index}].${fieldName}`]) : undefined;
+            const fieldError = errors ? (
+              get(errors, `${field.name}.${index}.${fieldName}`) || 
+              get(errors, `${field.name}[${index}].${fieldName}`)
+            ) : undefined;
             
             return (
               <FormField
@@ -105,6 +114,7 @@ const ArrayField = ({ field, onChange, errors }) => {
                 error={fieldError}
                 loading={fieldConfig.loading}
                 useDebouncing={false}
+                onBlur={handleBlur}
               />
             );
           })}

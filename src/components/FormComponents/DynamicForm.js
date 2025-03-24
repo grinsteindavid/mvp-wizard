@@ -49,6 +49,7 @@ const DynamicForm = ({ fields, onChange, errors, validateFieldOnBlur }) => {
                 field={field}
                 onChange={handleFieldChange}
                 errors={errors}
+                onBlur={handleBlur}
               />
             );
           case 'array':
@@ -58,6 +59,7 @@ const DynamicForm = ({ fields, onChange, errors, validateFieldOnBlur }) => {
                 field={field}
                 onChange={handleFieldChange}
                 errors={errors}
+                onBlur={handleBlur}
               />
             );
           default:

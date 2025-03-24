@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import FormField from './FormField';
 import { GroupContainer, GroupTitle } from './styled/FormElements';
 import styled from 'styled-components';
@@ -28,11 +28,16 @@ const GroupDescription = styled.p`
  * Groups fields together visually and handles nested field values.
  * Updated to work with field values and loading states stored within field definitions.
  */
-const FormGroup = ({ field, onChange, errors }) => {
+const FormGroup = ({ field, onChange, errors, onBlur }) => {
   const handleFieldChange = (fieldName, fieldValue) => {
     // Pass the fully qualified field name to the parent
     onChange(`${field.name}.${fieldName}`, fieldValue);
   };
+
+  const handleBlur = useCallback((fieldName) => {
+    // Pass the fully qualified field name to the parent
+    onBlur(`${field.name}.${fieldName}`);
+  }, [field.name]);
 
   // Calculate how many columns the grid should have based on field count
   const fieldCount = Object.keys(field.fields).length;
@@ -63,6 +68,7 @@ const FormGroup = ({ field, onChange, errors }) => {
               error={fieldError}
               loading={fieldConfig.loading}
               useDebouncing={true}
+              onBlur={handleBlur}
             />
           );
         })}
