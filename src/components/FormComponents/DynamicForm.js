@@ -11,26 +11,18 @@ import { FormContainer } from './styled/FormElements';
  * Updated to work with field values and loading states stored within field definitions.
  * Validation is now handled by the BaseDataSourceContext.
  */
-const DynamicForm = ({ fields, onChange, errors }) => {
+const DynamicForm = ({ fields, onChange, errors, validateFieldOnBlur }) => {
   const handleFieldChange = useCallback((name, value) => {
     // Update the form values by directly passing field name and value
     onChange(name, value);
   }, [onChange]);
 
-  // Use a stable object to store handlers by field name
-  const handlersRef = React.useRef({});
-
-  // Update handler references when dependencies change
-  useEffect(() => {
-    // Only recreate handlers if dependencies change
-    Object.keys(fields || {}).forEach((fieldName) => {
-      handlersRef.current[fieldName] = {
-        onBlur: () => {
-          // Validation now handled by the BaseDataSourceContext
-        }
-      };
-    });
-  }, [fields]);
+  const handleBlur = (name) => {
+    // Trigger validation for this field on blur if the validation function is provided
+    if (validateFieldOnBlur) {
+      validateFieldOnBlur(name);
+    }
+  };
 
   if (!fields) {
     return <div>No form fields available</div>;
@@ -47,9 +39,6 @@ const DynamicForm = ({ fields, onChange, errors }) => {
         
         // Get any error for this field from errors passed by context
         const fieldError = errors ? errors[fieldName] : undefined;
-        
-        // Get the stable blur handler from our ref
-        const handleBlur = handlersRef.current[fieldName]?.onBlur;
         
         // Render the appropriate component based on field type
         switch (field.type) {

@@ -59,6 +59,7 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
         values={currentSource.state || {}}
         onChange={handleFormChange}
         errors={currentSource.state?.errors || {}}
+        validateFieldOnBlur={(field) => currentSource.validateFieldOnBlur(field, schemaCreators[dataSource])}
       />
       
       <ButtonContainer>

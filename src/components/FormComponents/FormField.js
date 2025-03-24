@@ -75,6 +75,12 @@ const FormField = ({
 }) => {
   // Get the appropriate field component based on the field type
   const FieldComponent = fieldTypeMap[field.type];
+
+  const handleBlur = React.useCallback(() => {
+    if (onBlur) {
+      onBlur(field.name, value);
+    }
+  }, [field.name, value]);
   
   // If no matching component is found, show an error message
   if (!FieldComponent) {
@@ -102,7 +108,7 @@ const FormField = ({
         field={field}
         value={value}
         onChange={onChange}
-        onBlur={onBlur}
+        onBlur={handleBlur}
         error={error}
         disabled={disabled}
         loading={loading}

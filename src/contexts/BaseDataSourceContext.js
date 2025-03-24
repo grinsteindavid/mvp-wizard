@@ -20,7 +20,8 @@ const baseReducerActions = {
   SET_SUBMITTED: 'SET_SUBMITTED',
   RESET_FORM: 'RESET_FORM',
   SET_FIELD_LOADING: 'SET_FIELD_LOADING', // Action for field loading state (now updates loading in field definition)
-  UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS' // Action for updating field options dynamically
+  UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS', // Action for updating field options dynamically
+  VALIDATE_FIELD_ON_BLUR: 'VALIDATE_FIELD_ON_BLUR' // Action for validating a field on blur event
 };
 
 // Base reducer function that all data sources can extend
@@ -73,6 +74,11 @@ const baseReducer = (state, action) => {
           set(draft, `fields.${action.fieldName}.options`, action.options);
         }
       });
+    case baseReducerActions.VALIDATE_FIELD_ON_BLUR:
+      return produce(state, draft => {
+        // Apply validation to field without updating its value
+        applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema);
+      });
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
     default:
@@ -86,8 +92,12 @@ const BaseDataSourceContext = createContext();
 // Base actions creator that all data sources will have
 export const createBaseActions = (dispatch) => ({
   updateField: (field, value, validationSchema) => {
-    console.log('Updating field:', field, value, validationSchema)
     dispatch({ type: baseReducerActions.UPDATE_FIELD_VALUE, field, value, validationSchema });
+  },
+  
+  validateFieldOnBlur: (field, validationSchema) => {
+    console.log('Validating field on blur:', field);
+    dispatch({ type: baseReducerActions.VALIDATE_FIELD_ON_BLUR, field, validationSchema });
   },
   
   setValidationResult: (result) => {

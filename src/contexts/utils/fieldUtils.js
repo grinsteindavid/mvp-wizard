@@ -75,6 +75,8 @@ export const applyFieldValidation = (draft, field, value, validationSchema) => {
     // Update errors and validity state
     draft.errors = validationResult.errors;
     draft.isValid = validationResult.isValid;
+
+    console.log('Update errors and validity state', draft.errors, draft.isValid)
   } else {
     // If no schema provided, just clear the error for this field
     if (draft.errors && draft.errors[field]) {
