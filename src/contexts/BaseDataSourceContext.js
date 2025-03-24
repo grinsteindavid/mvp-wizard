@@ -8,7 +8,9 @@ const baseInitialState = {
   isValid: false,
   errors: {},
   isSubmitting: false,
-  isSubmitted: false
+  isSubmitted: false,
+  touchedFields: {}, // Track which fields have been touched by the user
+  validateAll: false // Flag to indicate if all fields should be validated (e.g., on submit)
   // loadingFields removed - now tracked in each field definition
 };
 
@@ -21,7 +23,9 @@ const baseReducerActions = {
   RESET_FORM: 'RESET_FORM',
   SET_FIELD_LOADING: 'SET_FIELD_LOADING', // Action for field loading state (now updates loading in field definition)
   UPDATE_FIELD_OPTIONS: 'UPDATE_FIELD_OPTIONS', // Action for updating field options dynamically
-  VALIDATE_FIELD_ON_BLUR: 'VALIDATE_FIELD_ON_BLUR' // Action for validating a field on blur event
+  VALIDATE_FIELD_ON_BLUR: 'VALIDATE_FIELD_ON_BLUR', // Action for validating a field on blur event
+  MARK_FIELD_AS_TOUCHED: 'MARK_FIELD_AS_TOUCHED', // Mark a field as touched by the user
+  SET_VALIDATE_ALL: 'SET_VALIDATE_ALL' // Set whether to validate all fields or just touched ones
 };
 
 // Base reducer function that all data sources can extend
@@ -32,8 +36,11 @@ const baseReducer = (state, action) => {
         // Update field value using the utility function
         updateFieldValue(draft, action.field, action.value);
         
+        // Mark this field as touched
+        draft.touchedFields[action.field] = true;
+        console.log(`draft.touchedFields`, {...state.touchedFields, [action.field]: true});
         // Apply validation using the utility function
-        applyFieldValidation(draft, action.field, action.value, action.validationSchema);
+        applyFieldValidation(draft, action.field, action.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
       });
     case baseReducerActions.SET_VALIDATION_RESULT:
       return produce(state, draft => {
@@ -76,8 +83,20 @@ const baseReducer = (state, action) => {
       });
     case baseReducerActions.VALIDATE_FIELD_ON_BLUR:
       return produce(state, draft => {
+        // Mark this field as touched
+        draft.touchedFields[action.field] = true;
+        
+        console.log(`draft.touchedFields`, {...state.touchedFields, [action.field]: true});
         // Apply validation to field without updating its value
-        applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema);
+        applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
+      });
+    case baseReducerActions.MARK_FIELD_AS_TOUCHED:
+      return produce(state, draft => {
+        draft.touchedFields[action.field] = true;
+      });
+    case baseReducerActions.SET_VALIDATE_ALL:
+      return produce(state, draft => {
+        draft.validateAll = action.payload;
       });
     case baseReducerActions.RESET_FORM:
       return { ...baseInitialState };
@@ -117,6 +136,14 @@ export const createBaseActions = (dispatch) => ({
   
   updateFieldOptions: (fieldName, options) => {
     dispatch({ type: baseReducerActions.UPDATE_FIELD_OPTIONS, fieldName, options });
+  },
+  
+  markFieldAsTouched: (field) => {
+    dispatch({ type: baseReducerActions.MARK_FIELD_AS_TOUCHED, field });
+  },
+  
+  setValidateAll: (validateAll) => {
+    dispatch({ type: baseReducerActions.SET_VALIDATE_ALL, payload: validateAll });
   },
   
   resetForm: () => {

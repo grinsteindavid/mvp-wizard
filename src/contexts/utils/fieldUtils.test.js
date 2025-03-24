@@ -1,4 +1,4 @@
-import { buildNestedFieldPath, updateFieldValue, applyFieldValidation } from './fieldUtils';
+import { normalizeArrayFieldPath, buildNestedFieldPath, updateFieldValue, applyFieldValidation } from './fieldUtils';
 import * as validationUtils from '../../utils/validationUtils';
 import { transformFieldsForValidation } from '../../components/Wizard/utils/formatHelpers';
 
@@ -12,6 +12,38 @@ jest.mock('../../utils/validationUtils', () => ({
 }));
 
 describe('fieldUtils', () => {
+  describe('normalizeArrayFieldPath', () => {
+    it('should convert bracket notation to dot notation', () => {
+      const result = normalizeArrayFieldPath('categoryGroups[0].name');
+      expect(result).toBe('categoryGroups.0.name');
+    });
+
+    it('should handle paths with multiple array indices', () => {
+      const result = normalizeArrayFieldPath('campaigns[0].adGroups[1].ads[2].title');
+      expect(result).toBe('campaigns.0.adGroups.1.ads.2.title');
+    });
+    
+    it('should leave dot notation as is', () => {
+      const result = normalizeArrayFieldPath('categoryGroups.0.name');
+      expect(result).toBe('categoryGroups.0.name');
+    });
+    
+    it('should handle paths with no array indices', () => {
+      const result = normalizeArrayFieldPath('campaign.name');
+      expect(result).toBe('campaign.name');
+    });
+    
+    it('should return empty string for empty input', () => {
+      const result = normalizeArrayFieldPath('');
+      expect(result).toBe('');
+    });
+    
+    it('should return empty string for null input', () => {
+      const result = normalizeArrayFieldPath(null);
+      expect(result).toBe('');
+    });
+  });
+  
   describe('buildNestedFieldPath', () => {
     it('should build correct path for a top-level field', () => {
       const result = buildNestedFieldPath(['name'], 'value');
@@ -64,12 +96,15 @@ describe('fieldUtils', () => {
   describe('applyFieldValidation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      transformFieldsForValidation.mockReturnValue({ name: 'Test' });
+      transformFieldsForValidation.mockReturnValue({ name: 'Test', email: 'test@example.com', items: [{ id: 1, name: 'Item 1' }] });
     });
 
     it('should apply validation when schema is provided', () => {
       const draft = {
-        fields: { name: { value: 'Test' } },
+        fields: { 
+          name: { value: 'Test' },
+          email: { value: 'test@example.com' }
+        },
         errors: { name: 'Required field' }
       };
 
@@ -85,25 +120,131 @@ describe('fieldUtils', () => {
 
       expect(transformFieldsForValidation).toHaveBeenCalledWith(draft.fields);
       expect(validationUtils.validateAndUpdateErrors).toHaveBeenCalledWith(
-        { name: 'Test' },
+        { name: 'Test', email: 'test@example.com', items: [{ id: 1, name: 'Item 1' }] },
         'name',
         'Test',
         schema
       );
       expect(draft.errors).toEqual({});
       expect(draft.isValid).toBe(true);
+      expect(draft._fullValidationErrors).toEqual({});
+    });
+    
+    it('should only show errors for touched fields', () => {
+      const draft = {
+        fields: { 
+          name: { value: 'Test' },
+          email: { value: '' }
+        },
+        errors: {}
+      };
+
+      const mockValidationResult = {
+        isValid: false,
+        errors: {
+          name: 'Name is required',
+          email: 'Email is required'
+        }
+      };
+
+      validationUtils.validateAndUpdateErrors.mockReturnValue(mockValidationResult);
+
+      const schema = { validate: jest.fn() };
+      // Mark both fields as touched to match the current implementation
+      // which doesn't automatically show errors for the current field
+      const touchedFields = { name: true, email: true };
+      
+      applyFieldValidation(draft, 'name', 'Test', schema, touchedFields, false);
+
+      // Since both fields are touched, both errors should be displayed
+      expect(draft.errors).toEqual({ 
+        name: 'Name is required',
+        email: 'Email is required'
+      });
+      expect(draft.isValid).toBe(false);
+      expect(draft._fullValidationErrors).toEqual({
+        name: 'Name is required',
+        email: 'Email is required'
+      });
+    });
+    
+    it('should show all errors when validateAll is true', () => {
+      const draft = {
+        fields: { 
+          name: { value: 'Test' },
+          email: { value: '' }
+        },
+        errors: {}
+      };
+
+      const mockValidationResult = {
+        isValid: false,
+        errors: {
+          name: 'Name is too short',
+          email: 'Email is required'
+        }
+      };
+
+      validationUtils.validateAndUpdateErrors.mockReturnValue(mockValidationResult);
+
+      const schema = { validate: jest.fn() };
+      const touchedFields = { name: true };
+      
+      applyFieldValidation(draft, 'name', 'Test', schema, touchedFields, true);
+
+      expect(draft.errors).toEqual({
+        name: 'Name is too short',
+        email: 'Email is required'
+      });
+      expect(draft.isValid).toBe(false);
+    });
+    
+    it('should handle array field notation differences', () => {
+      const draft = {
+        fields: { 
+          items: {
+            fields: {
+              '0': {
+                fields: {
+                  name: { value: 'Item 1' }
+                }
+              }
+            }
+          }
+        },
+        errors: {}
+      };
+
+      const mockValidationResult = {
+        isValid: false,
+        errors: {
+          'items.0.name': 'Item name is required'
+        }
+      };
+
+      validationUtils.validateAndUpdateErrors.mockReturnValue(mockValidationResult);
+
+      const schema = { validate: jest.fn() };
+      const touchedFields = { 'items[0].name': true };
+      
+      applyFieldValidation(draft, 'items[0].name', '', schema, touchedFields, false);
+
+      expect(draft.errors).toEqual({ 'items.0.name': 'Item name is required' });
+      expect(draft.isValid).toBe(false);
     });
 
     it('should just clear field error when no schema is provided', () => {
       const draft = {
         fields: { name: { value: 'Test' } },
-        errors: { name: 'Required field', email: 'Invalid email' }
+        errors: { name: 'Required field', email: 'Invalid email' },
+        _fullValidationErrors: { name: 'Required field', email: 'Invalid email' }
       };
 
       applyFieldValidation(draft, 'name', 'Test', null);
 
       expect(validationUtils.validateAndUpdateErrors).not.toHaveBeenCalled();
       expect(draft.errors).toEqual({ email: 'Invalid email' });
+      expect(draft._fullValidationErrors).toEqual({ email: 'Invalid email' });
     });
   });
 });

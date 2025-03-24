@@ -143,7 +143,45 @@
 - Implement focus management for modals and dialogs
 - Create accessible form components
 
-## UI Component Best Practices
+## UI/UX Component Best Practices
+
+### User Flow Design
+- Map out complete user journeys before implementation
+- Minimize steps required to complete primary tasks
+- Provide clear progress indicators for multi-step processes
+- Maintain consistent navigation patterns throughout the app
+- Design intuitive paths to help users achieve their goals
+
+### Feedback & Communication
+- Provide immediate feedback for all user actions
+- Use toast notifications for non-critical updates
+- Implement inline validation with helpful error messages
+- Show loading states for operations taking longer than 300ms
+- Communicate system status clearly (success, error, loading)
+- Use skeleton screens instead of spinners when possible
+
+### Form Design
+- Group related fields logically
+- Implement smart defaults to reduce user effort
+- Use appropriate input types for data being collected
+- Validate inputs in real-time with helpful guidance
+- Support keyboard navigation and tab order
+- Preserve user input when validation fails
+
+### Error Handling
+- Prevent errors with constraints and guidance
+- Provide clear recovery paths when errors occur
+- Use human-friendly error messages (avoid technical jargon)
+- Implement forgiving formatting for inputs (phone numbers, dates)
+- Design for edge cases and empty states
+
+### Performance Perception
+- Prioritize perceived performance over actual performance
+- Implement optimistic UI updates for common actions
+- Use progressive loading for complex data visualizations
+- Cache frequently accessed data for instant retrieval
+- Prefetch likely next actions to reduce waiting time
+
 
 ### Visual Hierarchy
 - Use consistent spacing system (4px, 8px, 16px, 24px, 32px, 48px, 64px)
