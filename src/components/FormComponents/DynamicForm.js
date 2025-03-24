@@ -13,7 +13,7 @@ import { validateField } from '../../services/validationService';
  * Updated to work with field values and loading states stored within field definitions.
  * Accepts a validationSchema prop for centralized validation.
  */
-const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema }) => {
+const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
   // Local state for field-level validation errors
   const [fieldErrors, setFieldErrors] = useState({});
   
@@ -36,13 +36,8 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
       [name]: validationResult.isValid ? undefined : validationResult.error
     }));
     
-    // If onValidate prop exists, call it with the validation result
-    if (onValidate) {
-      onValidate(name, validationResult);
-    }
-    
     return validationResult;
-  }, [fields, validationSchema, onValidate]);
+  }, [fields, validationSchema]);
 
   const handleFieldChange = useCallback((name, value) => {
     // Update the form values by directly passing field name and value
@@ -70,12 +65,6 @@ const DynamicForm = ({ fields, onChange, errors, onValidate, validationSchema })
       };
     });
   }, [fields, validationSchema, validateSingleField]);
-
-  // Clear field errors when fields change significantly
-  useEffect(() => {
-    if (!fields) return;
-    setFieldErrors({});
-  }, [fields]);
 
   if (!fields) {
     return <div>No form fields available</div>;

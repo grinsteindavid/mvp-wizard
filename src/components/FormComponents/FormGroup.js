@@ -37,9 +37,6 @@ const FormGroup = ({ field, onChange, errors }) => {
   // Calculate how many columns the grid should have based on field count
   const fieldCount = Object.keys(field.fields).length;
   const columnsCount = fieldCount > 1 && fieldCount <= 6 ? 2 : 1;
-  
-  // Group single-field rows together for better visual layout
-  const shouldGroup = fieldCount > 3;
 
   return (
     <GroupContainer>
@@ -65,7 +62,7 @@ const FormGroup = ({ field, onChange, errors }) => {
               onChange={handleFieldChange}
               error={fieldError}
               loading={fieldConfig.loading}
-              useDebouncing={shouldGroup}
+              useDebouncing={true}
             />
           );
         })}
