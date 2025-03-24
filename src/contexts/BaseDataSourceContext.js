@@ -2,6 +2,7 @@ import produce from 'immer';
 import React, { createContext, useContext, useReducer } from 'react';
 import { set } from 'lodash';
 import { validateField } from '../services/validationService';
+import { transformFieldsForValidation } from '../components/Wizard/utils/formatHelpers';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -36,31 +37,9 @@ const baseReducer = (state, action) => {
         // Helper function to validate and update errors
         const validateAndUpdateErrors = () => {
           if (action.validationSchema) {
-            // Instead of validating a single field, build the complete form data
-            // and validate the entire schema
-            
-            // First, build the complete form data object from all fields
-            const formData = {};
-            
-            if (draft.fields) {
-              Object.keys(draft.fields).forEach(topFieldName => {
-                const field = draft.fields[topFieldName];
-                
-                // Handle group fields (nested objects)
-                if (field.type === 'group' && field.fields) {
-                  formData[topFieldName] = {};
-                  
-                  Object.keys(field.fields).forEach(nestedFieldName => {
-                    const nestedField = field.fields[nestedFieldName];
-                    formData[topFieldName][nestedFieldName] = nestedField.value;
-                  });
-                } 
-                // Handle regular fields
-                else if (field.value !== undefined) {
-                  formData[topFieldName] = field.value;
-                }
-              });
-            }
+            // Use transformFieldsForValidation to build the complete form data object
+            // This handles nested fields, array fields, and type conversions
+            const formData = transformFieldsForValidation(draft.fields);
             
             // Make sure to include the field we're currently updating
             // in case it hasn't been set in the form state yet
