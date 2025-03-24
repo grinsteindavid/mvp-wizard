@@ -38,7 +38,6 @@ const baseReducer = (state, action) => {
         
         // Mark this field as touched
         draft.touchedFields[action.field] = true;
-        console.log(`draft.touchedFields`, {...state.touchedFields, [action.field]: true});
         // Apply validation using the utility function
         applyFieldValidation(draft, action.field, action.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
       });
@@ -86,7 +85,6 @@ const baseReducer = (state, action) => {
         // Mark this field as touched
         draft.touchedFields[action.field] = true;
         
-        console.log(`draft.touchedFields`, {...state.touchedFields, [action.field]: true});
         // Apply validation to field without updating its value
         applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
       });
