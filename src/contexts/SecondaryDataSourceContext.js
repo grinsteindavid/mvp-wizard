@@ -47,7 +47,7 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false, // Initialize loading state
+          loading: false, 
           description: 'Geographic locations where your ads will be shown'
         },
         devices: {
@@ -56,7 +56,7 @@ const initialState = {
           options: [],
           required: true,
           value: [],
-          loading: false, // Initialize loading state
+          loading: false, 
           description: 'Types of devices your ads will appear on'
         }
       }
