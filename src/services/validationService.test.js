@@ -4,7 +4,7 @@ jest.mock('../utils/validationUtils');
 jest.mock('../schemas');
 
 // Import modules
-import { validateProject, validateField } from './validationService';
+import { validateProject } from './validationService';
 import { formatValidationErrors, extractNestedSchema } from '../utils/validationUtils';
 import { schemaCreators } from '../schemas';
 
@@ -72,53 +72,6 @@ describe('validationService', () => {
       expect(result).toEqual({
         isValid: false,
         errors: { general: 'Invalid data source' }
-      });
-    });
-  });
-  
-  describe('validateField', () => {
-    test('should return isValid true when field validation passes', () => {
-      // Setup
-      const mockFieldSchema = { validate: jest.fn().mockReturnValue({ error: null }) };
-      mockSchema.extract.mockReturnValue(mockFieldSchema);
-      
-      // Execute
-      const result = validateField(mockSchema, 'projectName', 'Test Project');
-      
-      // Verify
-      expect(result).toEqual({
-        isValid: true,
-        error: null
-      });
-    });
-    
-    test('should return isValid false with error when field validation fails', () => {
-      // Setup
-      const mockFieldSchema = { 
-        validate: jest.fn().mockReturnValue({ 
-          error: { message: 'Project name is required' } 
-        }) 
-      };
-      mockSchema.extract.mockReturnValue(mockFieldSchema);
-      
-      // Execute
-      const result = validateField(mockSchema, 'projectName', '');
-      
-      // Verify
-      expect(result).toEqual({
-        isValid: false,
-        error: 'Project name is required'
-      });
-    });
-    
-    test('should return isValid false when schema is invalid', () => {
-      // Execute
-      const result = validateField(null, 'projectName', 'Test Project');
-      
-      // Verify
-      expect(result).toEqual({
-        isValid: false,
-        error: 'Invalid schema'
       });
     });
   });
