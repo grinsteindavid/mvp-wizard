@@ -1,6 +1,7 @@
 import produce from 'immer';
 import React, { createContext, useContext, useReducer } from 'react';
 import { set } from 'lodash';
+import { validateField } from '../services/validationService';
 
 // Base initial state for all data sources
 const baseInitialState = {
@@ -30,6 +31,83 @@ const baseReducer = (state, action) => {
         // Handle nested fields like 'targeting.countries'
         const parts = action.field.split('.');
         
+        // We'll validate the entire form state instead of individual fields
+        
+        // Helper function to validate and update errors
+        const validateAndUpdateErrors = () => {
+          if (action.validationSchema) {
+            // Instead of validating a single field, build the complete form data
+            // and validate the entire schema
+            
+            // First, build the complete form data object from all fields
+            const formData = {};
+            
+            if (draft.fields) {
+              Object.keys(draft.fields).forEach(topFieldName => {
+                const field = draft.fields[topFieldName];
+                
+                // Handle group fields (nested objects)
+                if (field.type === 'group' && field.fields) {
+                  formData[topFieldName] = {};
+                  
+                  Object.keys(field.fields).forEach(nestedFieldName => {
+                    const nestedField = field.fields[nestedFieldName];
+                    formData[topFieldName][nestedFieldName] = nestedField.value;
+                  });
+                } 
+                // Handle regular fields
+                else if (field.value !== undefined) {
+                  formData[topFieldName] = field.value;
+                }
+              });
+            }
+            
+            // Make sure to include the field we're currently updating
+            // in case it hasn't been set in the form state yet
+            const parts = action.field.split('.');
+            if (parts.length > 1) {
+              // For nested fields like 'bidding.amount'
+              const [parent, child] = [parts[0], parts[1]];
+              if (!formData[parent]) formData[parent] = {};
+              formData[parent][child] = action.value;
+            } else {
+              // For top-level fields
+              formData[action.field] = action.value;
+            }
+            
+            // Validate the entire form data against the schema
+            try {
+              const { error } = action.validationSchema.validate(formData, { abortEarly: false });
+              
+              // Clear all previous errors first
+              draft.errors = {};
+              
+              // If there are validation errors, format and set them
+              if (error) {
+                // Format each error into a field-specific message
+                error.details.forEach(detail => {
+                  const path = detail.path.join('.');
+                  draft.errors[path] = detail.message;
+                });
+                
+                draft.isValid = false;
+              } else {
+                draft.isValid = true;
+              }
+            } catch (err) {
+              console.error('Validation error:', err);
+              // If validation fails catastrophically, set a general error
+              draft.errors = { ...draft.errors, _general: 'Validation error occurred' };
+              draft.isValid = false;
+            }
+          } else {
+            // If no schema provided, just clear the error for this field
+            if (draft.errors && draft.errors[action.field]) {
+              delete draft.errors[action.field];
+            }
+          }
+        };
+        
         if (parts.length > 1) {
           // For nested fields, construct the path to the value property
           // Format: fields.groupName.fields.fieldName.value
@@ -46,20 +124,17 @@ const baseReducer = (state, action) => {
             }
           }, '');
           
+          // Update the field value
           set(draft, nestedPath, action.value);
           
-          // Clear the corresponding error when field is updated
-          if (draft.errors && draft.errors[action.field]) {
-            delete draft.errors[action.field];
-          }
+          // Validate with context
+          validateAndUpdateErrors();
         } else {
           // For top-level fields, use the simple path
           set(draft, `fields.${action.field}.value`, action.value);
           
-          // Clear the corresponding error when field is updated
-          if (draft.errors && draft.errors[action.field]) {
-            delete draft.errors[action.field];
-          }
+          // Validate with context
+          validateAndUpdateErrors();
         }
       });
     case baseReducerActions.SET_VALIDATION_RESULT:
@@ -141,8 +216,8 @@ const BaseDataSourceContext = createContext();
 
 // Base actions creator that all data sources will have
 export const createBaseActions = (dispatch) => ({
-  updateField: (field, value) => {
-    dispatch({ type: baseReducerActions.UPDATE_FIELD_VALUE, field, value });
+  updateField: (field, value, validationSchema) => {
+    dispatch({ type: baseReducerActions.UPDATE_FIELD_VALUE, field, value, validationSchema });
   },
   
   setValidationResult: (result) => {
@@ -184,21 +259,43 @@ export const createCombinedInitialState = (sourceInitialState) => ({
   ...sourceInitialState
 });
 
+// Helper function to validate a single field
+export const validateSingleField = (validationSchema, field, value) => {
+  if (!validationSchema) return { isValid: true };
+  return validateField(validationSchema, field, value);
+};
+
 // Base provider component that can be extended
 // Instead of creating the entire provider, this now returns the building blocks
 // that each context can use to create its own provider with custom useEffects
-export const createDataSourceBuilders = (initialState, reducer) => {
+export const createDataSourceBuilders = (initialState, reducer, validationSchema) => {
   const combinedInitialState = createCombinedInitialState(initialState);
   const combinedReducer = createCombinedReducer(reducer);
   
   return {
     combinedInitialState,
     combinedReducer,
-    createContextValue: (state, dispatch) => ({
-      state,
-      ...createBaseActions(dispatch),
-      dispatch
-    })
+    createContextValue: (state, dispatch) => {
+      const baseActions = createBaseActions(dispatch);
+      
+      // Enhanced updateField that includes validation
+      const enhancedUpdateField = (field, value, schemaCreator) => {
+        // If we have a schema creator function, call it to get the actual schema
+        const schema = typeof schemaCreator === 'function' ? schemaCreator() : schemaCreator;
+        baseActions.updateField(field, value, schema);
+      };
+      
+      return {
+        state,
+        ...baseActions,
+        updateField: enhancedUpdateField,
+        dispatch,
+        validateField: (field, value) => {
+          const schema = typeof validationSchema === 'function' ? validationSchema() : validationSchema;
+          return validateSingleField(schema, field, value);
+        }
+      };
+    }
   };
 };
 
@@ -217,8 +314,8 @@ export const createUseDataSource = (SourceContext, sourceName) => {
 export const baseActions = baseReducerActions;
 
 // For backward compatibility with tests
-export const createDataSourceProvider = (Context, initialState, reducer, fields) => {
-  const builders = createDataSourceBuilders(initialState, reducer, fields);
+export const createDataSourceProvider = (Context, initialState, reducer, validationSchema) => {
+  const builders = createDataSourceBuilders(initialState, reducer, validationSchema);
   
   return ({ children }) => {
     const [state, dispatch] = useReducer(builders.combinedReducer, builders.combinedInitialState);

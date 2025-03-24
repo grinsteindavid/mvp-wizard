@@ -1,53 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import FormField from './FormField';
 import FormGroup from './FormGroup';
 import ArrayField from './ArrayField';
 import { FormContainer } from './styled/FormElements';
-import { validateField } from '../../services/validationService';
 
 /**
  * DynamicForm component that renders a form based on a configuration object.
  * Supports different field types including groups and arrays.
- * Now with field-level validation using the validateField function from validationService.
- * Also supports loading state from field definitions.
+ * Supports loading state from field definitions.
  * Updated to work with field values and loading states stored within field definitions.
- * Accepts a validationSchema prop for centralized validation.
+ * Validation is now handled by the BaseDataSourceContext.
  */
-const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
-  // Local state for field-level validation errors
-  const [fieldErrors, setFieldErrors] = useState({});
-  
-  // Combine passed errors with local field validation errors
-  const combinedErrors = { ...fieldErrors, ...errors };
-
-  // Validate a single field
-  const validateSingleField = useCallback((name, value) => {
-    const field = fields[name];
-    
-    // Skip validation if no field or no validation schema
-    if (!field || !validationSchema) return;
-    
-    // Call the validateField function from validationService
-    const validationResult = validateField(validationSchema, name, value);
-    
-    // Update the local field errors
-    setFieldErrors(prev => ({
-      ...prev,
-      [name]: validationResult.isValid ? undefined : validationResult.error
-    }));
-    
-    return validationResult;
-  }, [fields, validationSchema]);
-
+const DynamicForm = ({ fields, onChange, errors }) => {
   const handleFieldChange = useCallback((name, value) => {
     // Update the form values by directly passing field name and value
     onChange(name, value);
-    
-    // Validate the field after a short delay to allow for typing
-    setTimeout(() => {
-      validateSingleField(name, value);
-    }, 300);
-  }, [onChange, validateSingleField]);
+  }, [onChange]);
 
   // Use a stable object to store handlers by field name
   const handlersRef = React.useRef({});
@@ -58,13 +26,11 @@ const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
     Object.keys(fields || {}).forEach((fieldName) => {
       handlersRef.current[fieldName] = {
         onBlur: () => {
-          if (validationSchema && fields[fieldName]) {
-            validateSingleField(fieldName, fields[fieldName].value);
-          }
+          // Validation now handled by the BaseDataSourceContext
         }
       };
     });
-  }, [fields, validationSchema, validateSingleField]);
+  }, [fields]);
 
   if (!fields) {
     return <div>No form fields available</div>;
@@ -79,8 +45,8 @@ const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
           name: fieldName
         };
         
-        // Get any error for this field from combined errors
-        const fieldError = combinedErrors ? combinedErrors[fieldName] : undefined;
+        // Get any error for this field from errors passed by context
+        const fieldError = errors ? errors[fieldName] : undefined;
         
         // Get the stable blur handler from our ref
         const handleBlur = handlersRef.current[fieldName]?.onBlur;
@@ -93,7 +59,7 @@ const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
                 key={fieldName}
                 field={field}
                 onChange={handleFieldChange}
-                errors={combinedErrors}
+                errors={errors}
               />
             );
           case 'array':
@@ -102,7 +68,7 @@ const DynamicForm = ({ fields, onChange, errors, validationSchema }) => {
                 key={fieldName}
                 field={field}
                 onChange={handleFieldChange}
-                errors={combinedErrors}
+                errors={errors}
               />
             );
           default:

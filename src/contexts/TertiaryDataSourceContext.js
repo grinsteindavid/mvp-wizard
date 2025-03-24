@@ -74,7 +74,7 @@ const initialState = {
           options: [],
           required: true,
           value: '',
-          loading: false, // Initialize loading state
+          loading: false, 
           description: 'The approach used to determine bid amounts'
         },
         amount: {
@@ -82,7 +82,6 @@ const initialState = {
           type: 'number',
           required: false,
           value: '',
-          dependsOn: { field: 'strategy', value: 'manual' },
           description: 'The specific amount you\'re willing to bid (only for manual strategy)'
         }
       }

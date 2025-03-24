@@ -93,7 +93,8 @@ const ArrayField = ({ field, onChange, errors }) => {
             };
             
             // Get any error for this specific field in this specific item
-            const fieldError = errors ? errors[`${field.name}[${index}].${fieldName}`] : undefined;
+            // Support dot notation format (array.index.field) for errors
+            const fieldError = errors ? (errors[`${field.name}.${index}.${fieldName}`] || errors[`${field.name}[${index}].${fieldName}`]) : undefined;
             
             return (
               <FormField

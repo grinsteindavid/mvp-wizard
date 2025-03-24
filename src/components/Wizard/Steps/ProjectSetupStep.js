@@ -22,13 +22,6 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
   
   // Verify that we have the expected data source
   const isContextValid = !!currentSource && typeof currentSource === 'object';
-  
-  // Create the validation schema for the current data source
-  const validationSchema = useMemo(() => {
-    if (!dataSource || !schemaCreators[dataSource]) return null;
-    return schemaCreators[dataSource]();
-  }, [dataSource]);
-
 
   /**
    * Handle form field changes
@@ -37,7 +30,7 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
    */
   const handleFormChange = (field, value) => {
     if (isContextValid && currentSource.updateField) {
-      currentSource.updateField(field, value);
+      currentSource.updateField(field, value, schemaCreators[dataSource]);
     }
   };
 
@@ -66,7 +59,6 @@ const ProjectSetupStep = ({ dataSourceContext }) => {
         values={currentSource.state || {}}
         onChange={handleFormChange}
         errors={currentSource.state?.errors || {}}
-        validationSchema={validationSchema}
       />
       
       <ButtonContainer>
