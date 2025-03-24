@@ -26,19 +26,10 @@ const Wizard = () => {
 
   // Check if data source is selected
   const isDataSourceSelected = !!dataSource;
-  
-  // Log the current state for debugging
-  console.log('Wizard render state:', { 
-    currentStep, 
-    dataSource, 
-    isDataSourceSelected, 
-    source: 'navigation-only context' 
-  });
 
   // Effect to redirect to step 0 if no data source is selected and we're not on step 0
   useEffect(() => {
     if (!isDataSourceSelected && currentStep > 0) {
-      console.log('No data source selected, redirecting to step 0 via useEffect');
       setStep(0);
     }
   }, [isDataSourceSelected, currentStep, setStep]);
