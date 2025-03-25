@@ -8,13 +8,6 @@ const TertiaryDataSourceContext = createContext();
 // Initial state specific to Tertiary Data Source - aligned with tertiarySchema
 const initialState = {
   fields: {
-    projectName: {
-      label: 'Project Name',
-      type: 'text',
-      required: true,
-      value: '',
-      description: 'A unique name to identify your advertising project'
-    },
     projectObjective: {
       label: 'Project Objective',
       type: 'select',

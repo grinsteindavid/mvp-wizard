@@ -8,13 +8,6 @@ const SecondaryDataSourceContext = createContext();
 // Initial state specific to Secondary Data Source - aligned with secondarySchema
 const initialState = {
   fields: {
-    projectName: {
-      label: 'Project Name',
-      type: 'text',
-      required: true,
-      value: '',
-      description: 'A unique name to identify your content campaign'
-    },
     targetUrl: {
       label: 'Target URL',
       type: 'url',

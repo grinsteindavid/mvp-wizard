@@ -24,13 +24,15 @@ const createTertiarySchema = () => Joi.object({
     }),
     type: Joi.string().valid('daily', 'lifetime').required().messages({
       'any.only': 'Please select a valid budget type',
-      'any.required': 'Budget type is required'
+      'any.required': 'Budget type is required',
+      'string.empty': 'Budget type cannot be empty'
     })
   }).required(),
   bidding: Joi.object({
     strategy: Joi.string().valid('manual', 'auto').required().messages({
       'any.only': 'Please select a valid bid strategy',
-      'any.required': 'Bid strategy is required'
+      'any.required': 'Bid strategy is required',
+      'string.empty': 'Bid strategy cannot be empty'
     }),
     amount: Joi.when('strategy', {
       is: 'manual',

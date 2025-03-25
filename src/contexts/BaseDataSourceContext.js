@@ -10,8 +10,16 @@ const baseInitialState = {
   isSubmitting: false,
   isSubmitted: false,
   touchedFields: {}, // Track which fields have been touched by the user
-  validateAll: false // Flag to indicate if all fields should be validated (e.g., on submit)
-  // loadingFields removed - now tracked in each field definition
+  validateAll: false, // Flag to indicate if all fields should be validated (e.g., on submit)
+  fields: {
+    projectName: {
+      label: 'Project Name',
+      type: 'text',
+      required: true,
+      value: '',
+      description: 'A unique name to identify your content campaign'
+    },
+  }
 };
 
 // Base reducer actions that all data sources will have
@@ -153,7 +161,7 @@ export const createCombinedReducer = (sourceReducer) => (state, action) => {
 // Create combined initial state
 export const createCombinedInitialState = (sourceInitialState) => ({
   ...baseInitialState,
-  ...sourceInitialState
+  ...{...sourceInitialState, fields: {...baseInitialState.fields, ...sourceInitialState.fields}}
 });
 
 

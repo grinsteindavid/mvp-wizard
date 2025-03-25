@@ -8,13 +8,6 @@ const PrimaryDataSourceContext = createContext();
 // Initial state specific to Primary Integration - aligned with primarySchema
 const initialState = {
   fields: {
-    projectName: {
-      label: 'Project Name',
-      type: 'text',
-      required: true,
-      value: '',
-      description: 'A unique name to identify your advertising project'
-    },
     dailyBudget: {
       label: 'Daily Budget',
       type: 'number',
