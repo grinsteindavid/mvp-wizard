@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldContainer, Label, Checkbox, OptionLabel, ErrorMessage, HelpText } from '../styled/FormElements';
+import { FieldContainer, Checkbox, OptionLabel, ErrorMessage } from '../styled/FormElements';
 
 const CheckboxesField = ({ 
   field, 
