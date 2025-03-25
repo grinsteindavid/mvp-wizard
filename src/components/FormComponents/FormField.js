@@ -47,34 +47,52 @@ const EnhancedFieldContainer = styled(FieldContainer)`
   /* Removed error top border as requested */
 `;
 
+const IconContainer = styled.span`
+  position: relative;
+  display: inline-block;
+  margin-left: 4px;
+`;
+
 const DescriptionIcon = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background-color: #4285f4;
   color: white;
-  font-size: 12px;
-  margin-left: 4px;
+  font-size: 10px;
   cursor: help;
-  vertical-align: middle;
+  vertical-align: top;
 `;
 
 const DescriptionTooltip = styled.div`
   position: absolute;
-  left: 0;
-  right: 0;
+  bottom: 20px;
+  right: -20px;
   background-color: #f9f9f9;
   color: #333;
-  padding: 8px;
+  padding: 6px 8px;
   border-radius: 4px;
-  font-size: 13px;
-  margin-top: 4px;
+  font-size: 11px;
+  width: 120px;
   border: 1px solid #ddd;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 5;
+  
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    transform: rotate(45deg);
+  }
 `;
 
 /**
@@ -132,6 +150,7 @@ const FormField = ({
   const isDevelopment = process.env.NODE_ENV === 'development';
   const shouldShowCounter = isDevelopment && showRenderCounter;
   
+  
   // Create the field component with all props
   const fieldComponent = (
     <EnhancedFieldContainer isLoading={loading} hasError={!!error}>
@@ -139,22 +158,22 @@ const FormField = ({
         {field.label}
         {field.required && <span className="required-indicator"> *</span>}
         {field.description && (
-          <DescriptionIcon
-            title={field.description}
-            onClick={() => setShowDescription(!showDescription)}
-            onMouseEnter={() => setShowDescription(true)}
-            onMouseLeave={() => setShowDescription(false)}
-          >
-            ?
-          </DescriptionIcon>
+          <IconContainer>
+            <DescriptionIcon
+              onClick={() => setShowDescription(!showDescription)}
+              onMouseEnter={() => setShowDescription(true)}
+              onMouseLeave={() => setShowDescription(false)}
+            >
+              ?
+            </DescriptionIcon>
+            {showDescription && (
+              <DescriptionTooltip>
+                {field.description}
+              </DescriptionTooltip>
+            )}
+          </IconContainer>
         )}
       </Label>
-      
-      {showDescription && field.description && (
-        <DescriptionTooltip>
-          {field.description}
-        </DescriptionTooltip>
-      )}
       <FieldComponent
         field={field}
         value={value}
@@ -170,7 +189,9 @@ const FormField = ({
   
   // Wrap with render counter if enabled
   return shouldShowCounter ? (
-    <RenderCounter>{fieldComponent}</RenderCounter>
+    <RenderCounter>
+      {fieldComponent}
+    </RenderCounter>
   ) : fieldComponent;
 };
 
