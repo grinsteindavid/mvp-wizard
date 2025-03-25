@@ -182,7 +182,7 @@ export const WizardContent = styled.div`
 
 // Common step styles
 export const StepContainer = styled.div`
-  padding: 32px 28px;
+  padding: 60px;
   
   @media (max-width: 768px) {
     padding: 24px 16px;
