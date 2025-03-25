@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { FieldContainer, Label, ErrorMessage, HelpText } from '../styled/FormElements';
+import { FieldContainer, ErrorMessage, HelpText } from '../styled/FormElements';
 import styled from 'styled-components';
 
 const ControlsContainer = styled.div`

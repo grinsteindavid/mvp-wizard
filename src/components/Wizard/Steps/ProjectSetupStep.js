@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useWizard } from '../../../contexts/WizardContext';
 import { dataSourceNames } from '../../../contexts/DataSourceFactory';
 import DynamicForm from '../../FormComponents/DynamicForm';
