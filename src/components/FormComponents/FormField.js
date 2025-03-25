@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { fieldTypeMap } from './fields';
-import { FieldContainer } from './styled/FormElements';
+import { FieldContainer, Label } from './styled/FormElements';
 import withFieldMemoization from './fields/withFieldMemoization';
 import RenderCounter from './RenderCounter';
 import styled from 'styled-components';
@@ -47,6 +47,36 @@ const EnhancedFieldContainer = styled(FieldContainer)`
   /* Removed error top border as requested */
 `;
 
+const DescriptionIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #4285f4;
+  color: white;
+  font-size: 12px;
+  margin-left: 4px;
+  cursor: help;
+  vertical-align: middle;
+`;
+
+const DescriptionTooltip = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-top: 4px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 5;
+`;
+
 /**
  * Generic form field component that renders the appropriate field component
  * based on the field type.
@@ -75,6 +105,7 @@ const FormField = ({
 }) => {
   // Get the appropriate field component based on the field type
   const FieldComponent = fieldTypeMap[field.type];
+  const [showDescription, setShowDescription] = useState(false);
 
   const handleBlur = React.useCallback(() => {
     if (onBlur) {
@@ -104,6 +135,26 @@ const FormField = ({
   // Create the field component with all props
   const fieldComponent = (
     <EnhancedFieldContainer isLoading={loading} hasError={!!error}>
+      <Label htmlFor={field.name}>
+        {field.label}
+        {field.required && <span className="required-indicator"> *</span>}
+        {field.description && (
+          <DescriptionIcon
+            title={field.description}
+            onClick={() => setShowDescription(!showDescription)}
+            onMouseEnter={() => setShowDescription(true)}
+            onMouseLeave={() => setShowDescription(false)}
+          >
+            ?
+          </DescriptionIcon>
+        )}
+      </Label>
+      
+      {showDescription && field.description && (
+        <DescriptionTooltip>
+          {field.description}
+        </DescriptionTooltip>
+      )}
       <FieldComponent
         field={field}
         value={value}

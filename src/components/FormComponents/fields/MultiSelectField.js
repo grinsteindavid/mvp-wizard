@@ -271,8 +271,6 @@ const MultiSelectField = React.memo(({
   
   return (
     <FieldContainer>
-      <Label htmlFor={field.name}>{field.label}</Label>
-      
       {!loading && field.options && field.options.length > 5 && (
         <SearchInput
           type="text"

@@ -33,7 +33,6 @@ const CheckboxesField = ({
 
   return (
     <FieldContainer>
-      <Label>{field.label}</Label>
       {loading ? (
         <div style={{ color: '#666', fontStyle: 'italic', marginBottom: '8px', padding: '4px 0' }}>
           Loading options...
@@ -54,7 +53,6 @@ const CheckboxesField = ({
         ))
       )}
       {error && <ErrorMessage>{error}</ErrorMessage>}
-      {field.helpText && <HelpText>{field.helpText}</HelpText>}
     </FieldContainer>
   );
 };
