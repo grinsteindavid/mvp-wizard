@@ -9,14 +9,14 @@ const CounterContainer = styled.div`
 
 const Counter = styled.div`
   position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 20px;
-  height: 20px;
+  top: -5px;
+  right: -5px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background-color: #6200ee;
   color: white;
-  font-size: 12px;
+  font-size: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,17 +25,19 @@ const Counter = styled.div`
 
 const Tooltip = styled.div`
   position: absolute;
-  top: -40px;
-  right: 0;
-  background-color: #333;
-  color: white;
-  padding: 5px 10px;
+  top: -25px;
+  right: -20px;
+  background-color: #f9f9f9;
+  color: #333;
+  padding: 6px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
+  width: 120px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.2s;
-  width: 200px;
   z-index: 11;
   
   ${Counter}:hover + & {
@@ -46,11 +48,14 @@ const Tooltip = styled.div`
   &:after {
     content: '';
     position: absolute;
-    bottom: -5px;
+    bottom: -4px;
     right: 10px;
-    border-width: 5px 5px 0;
-    border-style: solid;
-    border-color: #333 transparent transparent;
+    width: 8px;
+    height: 8px;
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    transform: rotate(45deg);
   }
 `;
 
@@ -83,7 +88,7 @@ const RenderCounter = ({ children }) => {
         {renderCount.current}
       </Counter>
       <Tooltip>
-        Number of renders for this component. High numbers may indicate performance issues.
+        Renders: {renderCount.current}
       </Tooltip>
     </CounterContainer>
   );
