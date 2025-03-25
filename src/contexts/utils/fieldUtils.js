@@ -83,7 +83,6 @@ export const updateFieldValue = (draft, field, value) => {
 export const applyFieldValidation = (draft, field, value, validationSchema, touchedFields = {}, validateAll = false) => {
   // Use transformFieldsForValidation to build the complete form data object
   const formData = transformFieldsForValidation(draft.fields);
-  
   if (validationSchema) {
     // Call the utility function to get validation results
     const validationResult = validateAndUpdateErrors(
@@ -98,8 +97,6 @@ export const applyFieldValidation = (draft, field, value, validationSchema, touc
     
     // But we'll only display errors for touched fields or if validateAll is true
     const displayErrors = {};
-
-    console.log(`displayErrors:`, allErrors);
     
     // Process each error field and check if it's been touched
     Object.entries(allErrors).forEach(([errorField, errorMessage]) => {
@@ -117,6 +114,7 @@ export const applyFieldValidation = (draft, field, value, validationSchema, touc
         displayErrors[errorField] = errorMessage;
       }
     });
+
     
     // Update displayed errors (what the user sees)
     draft.errors = validateAll ? allErrors : displayErrors;

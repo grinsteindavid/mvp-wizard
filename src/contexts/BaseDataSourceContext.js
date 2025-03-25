@@ -39,7 +39,7 @@ const baseReducer = (state, action) => {
         // Mark this field as touched
         draft.touchedFields[action.field] = true;
         // Apply validation using the utility function
-        applyFieldValidation(draft, action.field, action.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
+        applyFieldValidation(draft, action.field, action.value, action.validationSchema, draft.touchedFields, draft.validateAll);
       });
     case baseReducerActions.SET_VALIDATION_RESULT:
       return produce(state, draft => {
@@ -65,27 +65,13 @@ const baseReducer = (state, action) => {
       return produce(state, draft => {
         const parts = action.field.split('.');
         
-        if (parts.length > 1) {
-          // For nested fields, use the buildNestedFieldPath utility
-          const nestedPath = buildNestedFieldPath(parts, 'loading');
-          set(draft, nestedPath, action.isLoading);
-        } else {
-          // For top-level fields, use the simple path
-          set(draft, `fields.${action.field}.loading`, action.isLoading);
-        }
+        set(draft, buildNestedFieldPath(parts, 'loading'), action.isLoading);
       });
     case baseReducerActions.UPDATE_FIELD_OPTIONS:
       return produce(state, draft => {
         const parts = action.fieldName.split('.');
         
-        if (parts.length > 1) {
-          // For nested fields, use the buildNestedFieldPath utility
-          const nestedPath = buildNestedFieldPath(parts, 'options');
-          set(draft, nestedPath, action.options);
-        } else {
-          // For top-level fields, use the simple path
-          set(draft, `fields.${action.fieldName}.options`, action.options);
-        }
+        set(draft, buildNestedFieldPath(parts, 'options'), action.options);
       });
     case baseReducerActions.VALIDATE_FIELD_ON_BLUR:
       return produce(state, draft => {
@@ -93,7 +79,7 @@ const baseReducer = (state, action) => {
         draft.touchedFields[action.field] = true;
         
         // Apply validation to field without updating its value
-        applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema, {...state.touchedFields, [action.field]: true}, draft.validateAll);
+        applyFieldValidation(draft, action.field, draft.fields[action.field]?.value, action.validationSchema, draft.touchedFields, draft.validateAll);
       });
     case baseReducerActions.MARK_FIELD_AS_TOUCHED:
       return produce(state, draft => {
