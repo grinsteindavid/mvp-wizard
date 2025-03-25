@@ -9,30 +9,28 @@ const CounterContainer = styled.div`
 
 const Counter = styled.div`
   position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #6200ee;
-  color: white;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 0;
+  right: 0;
+  font-size: 9px;
+  padding: 1px 3px;
+  background-color: rgba(98, 0, 238, 0.1);
+  color: #6200ee;
+  border-radius: 0 4px 0 4px;
   z-index: 10;
+  font-family: monospace;
+  cursor: help;
 `;
 
 const Tooltip = styled.div`
   position: absolute;
-  top: -25px;
-  right: -20px;
+  top: 20px;
+  right: 0;
   background-color: #f9f9f9;
   color: #333;
   padding: 6px 8px;
   border-radius: 4px;
   font-size: 11px;
-  width: 120px;
+  width: 180px;
   border: 1px solid #ddd;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   visibility: hidden;
@@ -48,13 +46,13 @@ const Tooltip = styled.div`
   &:after {
     content: '';
     position: absolute;
-    bottom: -4px;
-    right: 10px;
+    top: -4px;
+    right: 5px;
     width: 8px;
     height: 8px;
     background-color: #f9f9f9;
-    border-right: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-top: 1px solid #ddd;
     transform: rotate(45deg);
   }
 `;
@@ -88,7 +86,7 @@ const RenderCounter = ({ children }) => {
         {renderCount.current}
       </Counter>
       <Tooltip>
-        Renders: {renderCount.current}
+        Developer info: Component render count. High values may indicate performance issues.
       </Tooltip>
     </CounterContainer>
   );
