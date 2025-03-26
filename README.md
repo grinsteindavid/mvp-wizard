@@ -2,6 +2,9 @@
 
 [![Live Demo](https://img.shields.io/badge/Demo-Live-brightgreen)](https://grinsteindavid.github.io/mvp-wizard)
 
+
+<img width="773" alt="image" src="https://github.com/user-attachments/assets/4e69f276-b831-45aa-bbe3-cabd5f610095" />
+
 ## Overview
 
 Workflow Wizard is a React-based multi-step form application that guides users through creating and managing projects across multiple data sources. It provides a streamlined, wizard-like interface for collecting and validating information specific to different data source integrations, with dynamic forms that adapt to each data source's unique requirements.
