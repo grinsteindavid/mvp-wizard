@@ -5,6 +5,9 @@
 
 <img width="773" alt="image" src="https://github.com/user-attachments/assets/4e69f276-b831-45aa-bbe3-cabd5f610095" />
 
+<img width="663" alt="image" src="https://github.com/user-attachments/assets/dfd9b3a4-5d1a-46d1-904e-4dd2090d4627" />
+
+
 ## Overview
 
 Workflow Wizard is a React-based multi-step form application that guides users through creating and managing projects across multiple data sources. It provides a streamlined, wizard-like interface for collecting and validating information specific to different data source integrations, with dynamic forms that adapt to each data source's unique requirements.
