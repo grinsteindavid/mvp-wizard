@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/mvp-wizard/static/css/main.f855e6bc.css",
+    "main.js": "/mvp-wizard/static/js/main.deb90ccd.js",
+    "static/js/453.937d39bc.chunk.js": "/mvp-wizard/static/js/453.937d39bc.chunk.js",
+    "index.html": "/mvp-wizard/index.html",
+    "main.f855e6bc.css.map": "/mvp-wizard/static/css/main.f855e6bc.css.map",
+    "main.deb90ccd.js.map": "/mvp-wizard/static/js/main.deb90ccd.js.map",
+    "453.937d39bc.chunk.js.map": "/mvp-wizard/static/js/453.937d39bc.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f855e6bc.css",
+    "static/js/main.deb90ccd.js"
+  ]
+}
